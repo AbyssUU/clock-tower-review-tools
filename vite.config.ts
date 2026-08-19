@@ -53,6 +53,7 @@ function imageProxy(): Plugin {
 }
 
 export default defineConfig({
+  base: '/clock-tower-review-tools/',
   plugins: [react(), imageProxy()],
   server: {
     port: 5173,
