@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(file input/*.jpg reference/*.jpg)",
+      "Bash(mkdir -p /tmp/botc_view)",
+      "Bash(sips -Z 1600 'input/魔典复盘.jpg' --out /tmp/botc_view/魔典复盘_view.jpg)",
+      "Read(//tmp/**)",
+      "Bash(sips -Z 900 -s format jpeg -s formatOptions 80 'input/魔典复盘.jpg' --out /tmp/botc_view/魔典复盘_small.jpg)",
+      "Bash(node -e ' *)",
+      "Bash(npm run *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -sL \"https://raw.githubusercontent.com/bra1n/townsquare/main/src/roles.json\" -o townsquare_roles.json)",
+      "Bash(node -e \"const d=require\\('/tmp/townsquare_roles.json'\\); const teams={}; for\\(const r of d\\){teams[r.team]=\\(teams[r.team]||0\\)+1} console.log\\(JSON.stringify\\(teams,null,2\\)\\)\")",
+      "Bash(curl -sL \"https://api.github.com/repos/bra1n/townsquare/git/trees/main?recursive=1\" -o townsquare_tree.json)",
+      "Bash(python3 *)"
+    ]
+  }
+}

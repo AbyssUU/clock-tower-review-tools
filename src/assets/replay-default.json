@@ -1,0 +1,732 @@
+{
+  "meta": {
+    "title": "暗藏玄机",
+    "storyteller": "故渊",
+    "date": "2026-08-12",
+    "winner": "evil",
+    "winningReason": "邪恶阵营通过依靠赶尸和画皮逻辑使爪牙晚出局一天，并空过一天避免了单边痢蛭逻辑，成功存活至最后。",
+    "theme": "crimson-hall"
+  },
+  "scriptMeta": {
+    "scriptName": "暗藏玄机",
+    "author": "故渊",
+    "version": "2.1.0",
+    "logo": "https://www.merlin-botc.com/uploads/logos/944235b4b86542c55bd177d1433d308a46ff373689c97e173a147c8269ec73b5.png"
+  },
+  "evilSetup": {
+    "demonBluffs": [
+      "占卜师",
+      "哲学家",
+      "赌徒"
+    ],
+    "evilKnowledgeNotes": ""
+  },
+  "customGlossary": [
+    {
+      "tag": "主谋局",
+      "color": "#9C8CC4",
+      "description": "恶魔死于处决后触发主谋日，若次日处决好人则邪恶获胜"
+    },
+    {
+      "tag": "对跳",
+      "color": "#D47380",
+      "description": "两名玩家声明同一角色产生对立"
+    },
+    {
+      "tag": "自爆",
+      "color": "#E07B39",
+      "description": "邪恶阵营玩家主动牺牲或暴露身份以扰乱局势"
+    },
+    {
+      "tag": "刺杀",
+      "color": "#B23A48",
+      "description": "刺客发动夜间强杀能力"
+    },
+    {
+      "tag": "哲学家",
+      "color": "#4F86C6",
+      "description": "获得其他善良角色能力并可能使在场原角色醉酒"
+    }
+  ],
+  "customSections": [],
+  "specialRoles": [],
+  "characterAliases": {},
+  "initialPlayers": [
+    {
+      "seatNumber": 1,
+      "name": "秋离",
+      "realCharacter": "隐士",
+      "isAlive": true,
+      "hasGhostVote": true,
+      "activeTokens": [
+        {
+          "id": "tok-mt0m6vjv-11",
+          "label": "6",
+          "type": "custom",
+          "color": "#D4AF37"
+        }
+      ],
+      "customTags": []
+    },
+    {
+      "seatNumber": 2,
+      "name": "载玖",
+      "realCharacter": "茶艺师",
+      "isAlive": true,
+      "hasGhostVote": false,
+      "activeTokens": [
+        {
+          "id": "t2-1",
+          "label": "熟客",
+          "type": "reminder",
+          "color": "#4F86C6",
+          "characterName": "店小二"
+        },
+        {
+          "id": "tok-mt0m4aj8-w",
+          "label": "死亡",
+          "type": "reminder",
+          "characterName": "痢蛭",
+          "color": "#C0392B"
+        }
+      ],
+      "customTags": []
+    },
+    {
+      "seatNumber": 3,
+      "name": "X",
+      "realCharacter": "主谋",
+      "isAlive": true,
+      "hasGhostVote": false,
+      "activeTokens": [],
+      "customTags": [
+        "主谋局"
+      ]
+    },
+    {
+      "seatNumber": 4,
+      "name": "祈",
+      "realCharacter": "痢蛭",
+      "isAlive": true,
+      "hasGhostVote": true,
+      "activeTokens": [],
+      "customTags": [],
+      "fakeCharacter": "占卜师"
+    },
+    {
+      "seatNumber": 5,
+      "name": "液化世界",
+      "realCharacter": "侍女",
+      "isAlive": true,
+      "hasGhostVote": false,
+      "activeTokens": [
+        {
+          "id": "tok-mt0m2ibd-q",
+          "label": "1 2-0",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m2n7b-r",
+          "label": "3 4-1",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m2qpp-s",
+          "label": "死亡",
+          "type": "reminder",
+          "characterName": "月之子",
+          "color": "#6FA86C"
+        }
+      ],
+      "customTags": []
+    },
+    {
+      "seatNumber": 6,
+      "name": "StephenL",
+      "realCharacter": "店小二",
+      "isAlive": true,
+      "hasGhostVote": false,
+      "activeTokens": [
+        {
+          "id": "tok-mt0m20ab-o",
+          "label": "2 7",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m61d1-y",
+          "label": "死亡",
+          "type": "reminder",
+          "characterName": "月之子",
+          "color": "#6FA86C"
+        }
+      ],
+      "customTags": []
+    },
+    {
+      "seatNumber": 7,
+      "name": "歪歪大王",
+      "realCharacter": "驱魔人",
+      "isAlive": true,
+      "hasGhostVote": true,
+      "activeTokens": [
+        {
+          "id": "tok-mt0m1hpb-l",
+          "label": "醉酒",
+          "type": "reminder",
+          "characterName": "店小二",
+          "color": "#4F86C6"
+        },
+        {
+          "id": "tok-mt0m1ly3-m",
+          "label": "10 12 4",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m1rxv-n",
+          "label": "死亡",
+          "type": "reminder",
+          "characterName": "刺客",
+          "color": "#B23A48"
+        }
+      ],
+      "customTags": []
+    },
+    {
+      "seatNumber": 8,
+      "name": "黑屏君HP",
+      "realCharacter": "气球驾驶员",
+      "isAlive": true,
+      "hasGhostVote": true,
+      "activeTokens": [
+        {
+          "id": "tok-mt0m0x33-j",
+          "label": "11 10",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m6cin-z",
+          "label": "死亡",
+          "type": "reminder",
+          "characterName": "痢蛭",
+          "color": "#C0392B"
+        }
+      ],
+      "customTags": []
+    },
+    {
+      "seatNumber": 9,
+      "name": "七月三",
+      "realCharacter": "博学者",
+      "isAlive": true,
+      "hasGhostVote": false,
+      "activeTokens": [
+        {
+          "id": "tok-mt0m09j6-i",
+          "label": "中毒",
+          "type": "reminder",
+          "characterName": "痢蛭",
+          "color": "#C0392B"
+        },
+        {
+          "id": "tok-mt0m8bup-16",
+          "label": "外来数量异常 邪恶邻座",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m8oo9-17",
+          "label": "邪恶号码和为偶数 邪恶对坐",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m98c4-18",
+          "label": "场上状态异常玩家数量为奇数 巡察赌徒均在场",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m9osp-19",
+          "label": "昨晚是主谋夜 爪牙种类为画皮赶尸人",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m9ud5-1a",
+          "label": "4痢蛭 12梼杌",
+          "type": "custom",
+          "color": "#D4AF37"
+        }
+      ],
+      "customTags": []
+    },
+    {
+      "seatNumber": 10,
+      "name": "G",
+      "realCharacter": "月之子",
+      "isAlive": true,
+      "hasGhostVote": true,
+      "activeTokens": [
+        {
+          "id": "tok-mt0m6mps-10",
+          "label": "死亡",
+          "type": "reminder",
+          "characterName": "痢蛭",
+          "color": "#C0392B"
+        }
+      ],
+      "customTags": []
+    },
+    {
+      "seatNumber": 11,
+      "name": "灵猫岛",
+      "realCharacter": "巡察",
+      "isAlive": true,
+      "hasGhostVote": false,
+      "activeTokens": [
+        {
+          "id": "tok-mt0m7bq9-12",
+          "label": "巡察 茶艺",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m7g0h-13",
+          "label": "占卜 侍女",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m7mu8-14",
+          "label": "巡察 茶艺",
+          "type": "custom",
+          "color": "#D4AF37"
+        },
+        {
+          "id": "tok-mt0m7s19-15",
+          "label": "博学 占卜",
+          "type": "custom",
+          "color": "#D4AF37"
+        }
+      ],
+      "customTags": [
+        "哲学家"
+      ]
+    },
+    {
+      "seatNumber": 12,
+      "name": "yuki",
+      "realCharacter": "刺客",
+      "isAlive": true,
+      "hasGhostVote": false,
+      "activeTokens": [
+        {
+          "id": "t12-1",
+          "label": "失去能力",
+          "type": "reminder",
+          "color": "#B23A48",
+          "characterName": "刺客"
+        },
+        {
+          "id": "tok-mt0m59kt-x",
+          "label": "7",
+          "type": "custom",
+          "color": "#D4AF37"
+        }
+      ],
+      "customTags": [
+        "刺杀"
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "id": "n1",
+      "phaseType": "night",
+      "phaseNumber": 1,
+      "title": "第 1 夜 · 暗夜涌动",
+      "logs": [
+        {
+          "id": "n1-2",
+          "type": "info",
+          "characterName": "店小二",
+          "content": "[6]得知[2]与[7]为善良玩家，并使[7]醉酒",
+          "customTag": "醉酒"
+        },
+        {
+          "id": "n1-4",
+          "type": "info",
+          "sourceSeat": 5,
+          "characterName": "侍女",
+          "content": "[5]查验[1]和[2]得知当晚有0名玩家因自身能力被唤醒"
+        },
+        {
+          "id": "log-mt0lh4cj-0",
+          "type": "info",
+          "content": "[8]得知了[11]"
+        }
+      ],
+      "boardSnapshot": {
+        "livingPlayerSeats": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "tokensMap": {}
+      }
+    },
+    {
+      "id": "d1",
+      "phaseType": "day",
+      "phaseNumber": 1,
+      "title": "第 1 天 · 焦点对抗",
+      "logs": [
+        {
+          "id": "d1-2",
+          "type": "player_speech",
+          "characterName": "博学者",
+          "content": "[9]得知了一条正确信息，一条错误信息：外来数量异常；邪恶邻座"
+        },
+        {
+          "id": "log-mt0ljbfr-1",
+          "type": "nomination",
+          "content": "[6] 提名[6]，[7]、[8]、[9]、[10]、[1]、[2]、[4]、[5]、[6]赞同，[6]标记待处决",
+          "votes": "9/6"
+        },
+        {
+          "id": "log-mt0ljbqv-2",
+          "type": "nomination",
+          "content": "[1]提名[1]，[1]因（隐士）的（魔像）能力死亡了，因（月之子）能力选择了[6]，0人赞同",
+          "votes": "0/6",
+          "customTag": "死亡"
+        },
+        {
+          "id": "log-mt0lnwjx-3",
+          "type": "execution",
+          "content": "[6]因处决而死亡",
+          "customTag": "死亡"
+        }
+      ]
+    },
+    {
+      "id": "n2",
+      "phaseType": "night",
+      "phaseNumber": 2,
+      "title": "第 2 夜 · 刀锋暗影",
+      "logs": [
+        {
+          "id": "log-mt0lp304-4",
+          "content": "[7]选择了[10]，无事发生"
+        },
+        {
+          "id": "log-mt0lqi9e-5",
+          "content": "[11]选择了保护（巡察）和（茶艺师）"
+        },
+        {
+          "id": "log-mt0lqinb-6",
+          "type": "attack",
+          "content": "[4]选择击杀了[10],[10]死亡",
+          "customTag": "死亡"
+        },
+        {
+          "id": "log-mt0lsu55-7",
+          "content": "[12]不选择行动"
+        },
+        {
+          "id": "log-mt0lswm2-8",
+          "type": "info",
+          "content": "[8]得知了[10]"
+        },
+        {
+          "id": "log-mt0lsx2i-9",
+          "type": "info",
+          "content": "[5]选择了[3]和[4]，得知当晚其中有1名玩家因自身能力被唤醒"
+        }
+      ]
+    },
+    {
+      "id": "d2",
+      "phaseType": "day",
+      "phaseNumber": 2,
+      "title": "第 2 天 · 迷雾渐浓",
+      "logs": [
+        {
+          "id": "d2-1",
+          "type": "death",
+          "content": "[10]死亡，[10]选择了[5]"
+        },
+        {
+          "id": "log-mt0lwj27-b",
+          "type": "info",
+          "content": "[9]因中毒得知了两条错误信息：邪恶玩家号码和为偶数，邪恶对坐"
+        },
+        {
+          "id": "log-mt0lwj7r-c",
+          "type": "nomination",
+          "content": "[5]提名[5]，0人赞同",
+          "votes": "0/5"
+        },
+        {
+          "id": "log-mt0lwjcd-d",
+          "type": "nomination",
+          "content": "[2]提名[3]，[7]、[9]、[2]赞同",
+          "votes": "3/5"
+        },
+        {
+          "id": "log-mt0pmhv8-z",
+          "type": "player_speech",
+          "content": "由于[3]跳出哲学家，[4]跳出占卜师，与[5]信息不符，且[3]未标记处决，选择出[4]"
+        },
+        {
+          "id": "log-mt0lwjgz-e",
+          "type": "nomination",
+          "content": "[7]提名[4]，[5]、[7]、[8]、[9]、[12]、[4]赞同，标记待处决",
+          "votes": "6/5"
+        },
+        {
+          "id": "log-mt0pf9ja-x",
+          "type": "execution",
+          "content": "[4]被处决但没有死亡"
+        }
+      ]
+    },
+    {
+      "id": "n3",
+      "phaseType": "night",
+      "phaseNumber": 3,
+      "title": "第 3 夜 · 绝命博弈",
+      "logs": [
+        {
+          "id": "n3-1",
+          "targetSeats": [
+            1,
+            8
+          ],
+          "content": "[7]选择了[12]，无事发生"
+        },
+        {
+          "id": "log-mt0olf1f-f",
+          "content": "[11]选择保护了（侍女）和占卜师，由于占卜师不在场，保护不生效"
+        },
+        {
+          "id": "log-mt0og30z-b",
+          "type": "attack",
+          "content": "[4]选择击杀了[8]，[8]死亡",
+          "customTag": "死亡"
+        },
+        {
+          "id": "log-mt0om47t-g",
+          "content": "[12]选择不使用技能"
+        }
+      ]
+    },
+    {
+      "id": "d3",
+      "phaseType": "day",
+      "phaseNumber": 3,
+      "title": "第 3 天 · 破局主谋",
+      "logs": [
+        {
+          "id": "d3-1",
+          "type": "death",
+          "content": "[8]死亡"
+        },
+        {
+          "id": "log-mt0o6mmv-0",
+          "type": "info",
+          "content": "[9]因中毒得知了两条错误信息：场上状态异常玩家数量为奇数，巡察赌徒均在场"
+        },
+        {
+          "id": "log-mt0oynhv-s",
+          "type": "player_speech",
+          "content": "此时[4]被认为是活尸，[3]被认为是赶尸人/画皮"
+        },
+        {
+          "id": "log-mt0oynrn-t",
+          "type": "nomination",
+          "content": "[11]提名[3]，[4]、[7]、[11]、[12]、[2]赞同，标记待处决"
+        },
+        {
+          "id": "log-mt0pg0l3-y",
+          "type": "nomination",
+          "content": "[9]提名[12]，0人赞同"
+        },
+        {
+          "id": "log-mt0oyo0w-u",
+          "type": "nomination",
+          "content": "新日[9]提名[12]，0人赞同"
+        },
+        {
+          "id": "log-mt0oyofg-v",
+          "type": "nomination",
+          "content": "[7]提名[11]，0人赞成"
+        },
+        {
+          "id": "log-mt0oyphv-w",
+          "type": "execution",
+          "content": "[3]被处决并死亡"
+        }
+      ]
+    },
+    {
+      "id": "phase-mt0lx097-f",
+      "phaseType": "night",
+      "phaseNumber": 4,
+      "title": "第 4 夜",
+      "logs": [
+        {
+          "id": "log-mt0onqiz-h",
+          "content": "[7]选择了[4]，但由于[7]醉酒，能力无法正常生效"
+        },
+        {
+          "id": "log-mt0o8fv2-1",
+          "content": "[11]选择保护了（博学者）和占卜师，但由于占卜师不在场，技能不生效"
+        },
+        {
+          "id": "log-mt0ogz0c-c",
+          "type": "attack",
+          "content": "[4]选择击杀[11]，[11]被（巡察）保护免于死亡"
+        },
+        {
+          "id": "log-mt0oorsv-i",
+          "type": "attack",
+          "content": "[12]选择击杀[7]，[7]死亡",
+          "customTag": "死亡"
+        }
+      ]
+    },
+    {
+      "id": "phase-mt0lx3fj-g",
+      "phaseType": "day",
+      "phaseNumber": 5,
+      "title": "第 4 天",
+      "logs": [
+        {
+          "id": "log-mt0oaklb-2",
+          "type": "death",
+          "content": "[7]死亡"
+        },
+        {
+          "id": "log-mt0ovv56-o",
+          "type": "info",
+          "content": "[9]得知了两条错误信息：昨晚为主谋夜，爪牙种类为画皮赶尸人"
+        },
+        {
+          "id": "log-mt0ow6lw-p",
+          "type": "nomination",
+          "content": "[2]提名[4]，[11]、[2]赞同",
+          "votes": "2/3"
+        },
+        {
+          "id": "log-mt0oxaft-q",
+          "type": "nomination",
+          "content": "[12]提名[11]，无人赞同",
+          "votes": "0/3"
+        },
+        {
+          "id": "log-mt0oxctt-r",
+          "type": "execution",
+          "content": "无人被处决，平安白"
+        }
+      ]
+    },
+    {
+      "id": "phase-mt0lx4s5-h",
+      "phaseType": "night",
+      "phaseNumber": 6,
+      "title": "第 5 夜",
+      "logs": [
+        {
+          "id": "log-mt0oiq66-d",
+          "content": "[11]选择保护（博学者）和占卜师，由于占卜师不在场，保护不生效"
+        },
+        {
+          "id": "log-mt0oatqa-3",
+          "type": "attack",
+          "content": "[4]选择击杀了[2]，[2]死亡",
+          "customTag": "死亡"
+        }
+      ]
+    },
+    {
+      "id": "phase-mt0oazj2-4",
+      "phaseType": "day",
+      "phaseNumber": 7,
+      "title": "第 5 天",
+      "logs": [
+        {
+          "id": "log-mt0oq8dk-j",
+          "type": "death",
+          "content": "[2]死亡"
+        },
+        {
+          "id": "log-mt0oqmh3-k",
+          "type": "info",
+          "content": "[9]得知了一条正确信息，一条错误信息：4是痢蛭，12是梼杌"
+        },
+        {
+          "id": "log-mt0orgsr-l",
+          "type": "nomination",
+          "content": "[12]提名[11]，12、4赞成，[11]标记待处决",
+          "votes": "2/2"
+        },
+        {
+          "id": "log-mt0pqnix-11",
+          "type": "player_speech",
+          "content": "[12]的赌徒被怀疑了，但由于未能准确判断恶魔种类，选择出[12]"
+        },
+        {
+          "id": "log-mt0osttg-m",
+          "type": "nomination",
+          "content": "[9]提名[12]，[1]、[4]、[7]、[8]、[9]赞成，[11]标记待处决",
+          "votes": "5/2"
+        },
+        {
+          "id": "log-mt0oudci-n",
+          "type": "execution",
+          "content": "[1]被处决并死亡了"
+        }
+      ]
+    },
+    {
+      "id": "phase-mt0ob33a-5",
+      "phaseType": "night",
+      "phaseNumber": 8,
+      "title": "第 6 夜",
+      "logs": [
+        {
+          "id": "log-mt0oc7n1-9",
+          "content": "[11]选择保护（巡察）和（博学者），但由于上一晚已经守护了（博学者），保护能力不生效"
+        },
+        {
+          "id": "log-mt0obmhg-8",
+          "type": "attack",
+          "content": "[4]选择击杀[11],[11]死亡",
+          "customTag": "死亡"
+        },
+        {
+          "id": "log-mt0ocm7o-a",
+          "type": "comment",
+          "content": "游戏结束，邪恶阵营获胜"
+        }
+      ]
+    }
+  ],
+  "modules": {
+    "fabled": false
+  }
+}
