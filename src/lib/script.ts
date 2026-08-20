@@ -1,4 +1,5 @@
 import type { ScriptCharacter } from '../types'
+import { proxiedImage } from './proxy'
 
 // 从剧本 JSON 数组解析角色（跳过 _meta 等非角色项）
 export function parseScriptArray(raw: unknown[]): { characters: ScriptCharacter[]; metaName?: string; metaAuthor?: string; metaLogo?: string } {
@@ -88,23 +89,7 @@ export function displayName(name?: string, aliases?: Record<string, string>): st
   return aliases?.[name] ?? name
 }
 
-export function proxiedImage(url?: string): string | undefined {
-  if (!url) return undefined
-  if (url.startsWith('data:') || url.startsWith('/') || url.startsWith('blob:')) return url
-
-  try {
-    if (import.meta.env.DEV) {
-      // 本地开发/预览走 vite 插件代理
-      return `/__img?src=${encodeURIComponent(url)}`
-    }
-  } catch (e) {
-    // 某些环境下 import.meta 访问异常，继续到生产分支
-  }
-
-  // 生产环境（静态托管）使用公共图片代理以避免 /__img 404 或无 CORS 问题
-  const trimmed = url.replace(/^https?:\/\//i, '')
-  return `https://images.weserv.nl/?url=${encodeURIComponent(trimmed)}`
-}
+export { proxiedImage }
 
 // 角色图标（优先剧本 image，回退到常见 icon 路径）
 export function characterImage(map: Map<string, ScriptCharacter> | undefined, name?: string): string | undefined {

@@ -1,8 +1,9 @@
 import type { SpecialRoleEntry } from '../types'
+import { proxiedImage } from './proxy'
 
 // ============ 传奇角色（Fabled）与奇遇角色（Travelers）目录 ============
 // 名称与图标取自 bra1n/townsquare 源码（src/fabled.json、src/roles.json、src/assets/icons/*.png）
-// 图标通过本地 /__img 代理访问，保证 html-to-image 导出可内联跨域图片。
+// 图标经跨域图片代理（lib/proxy.ts）访问，保证 html-to-image 导出可内联跨域图片。
 
 const TS_ICON = (id: string) =>
   `https://raw.githubusercontent.com/bra1n/townsquare/main/src/assets/icons/${id}.png`
@@ -64,14 +65,9 @@ export function findSpecial(nameOrId?: string): SpecialCatalogItem | undefined {
 
 // 解析传奇/奇遇角色的图标（优先自定义 image，其次目录图标）
 export function specialImage(entry: SpecialRoleEntry): string | undefined {
-  if (entry.image) return proxiedSpecial(entry.image)
+  if (entry.image) return proxiedImage(entry.image)
   const hit = findSpecial(entry.nameEn) ?? findSpecial(entry.name) ?? findSpecial(entry.id)
-  return hit ? proxiedSpecial(hit.image) : undefined
-}
-
-function proxiedSpecial(url: string): string {
-  if (url.startsWith('data:') || url.startsWith('/') || url.startsWith('blob:')) return url
-  return `/__img?src=${encodeURIComponent(url)}`
+  return hit ? proxiedImage(hit.image) : undefined
 }
 
 // 传奇/奇遇角色的阵营色（区别于标准阵营）

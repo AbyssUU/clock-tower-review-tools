@@ -1,0 +1,5 @@
+# Cloudflare Worker 配置
+# 部署前把 name 改成你自己的（Worker 名称在 Cloudflare 上需全局唯一）：
+name = "botc-image-proxy"
+main = "image-proxy.js"
+compatibility_date = "2024-01-01"

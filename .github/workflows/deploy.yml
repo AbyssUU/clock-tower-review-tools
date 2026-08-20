@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 允许 GITHUB_TOKEN 读写 Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          # 图片代理地址（用于 GitHub Pages 加载跨域角色图标）。
+          # 在仓库 Settings → Secrets and variables → Actions → Variables 新增 IMAGE_PROXY_BASE，
+          # 值为你的 Cloudflare Worker 或 Vercel Serverless 函数地址（末尾不带斜杠）。
+          # 例：https://botc-image-proxy.your-subdomain.workers.dev
+          VITE_IMAGE_PROXY_BASE: ${{ vars.IMAGE_PROXY_BASE }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

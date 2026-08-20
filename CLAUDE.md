@@ -17,6 +17,7 @@
 | 图标 | lucide-react |
 | 动画 | Framer Motion（部分装饰） |
 | 导出 | html-to-image（`toPng`） |
+| 部署 | GitHub Pages（静态）+ Cloudflare Worker / Vercel Serverless（图片代理） |
 
 常用命令：
 
@@ -40,11 +41,13 @@ src/
 ├── store.ts                    # zustand store（唯一数据源）
 ├── sampleData.ts               # 示例复盘数据（引用 src/assets/replay-default.json）
 ├── types.ts                    # 全部 TypeScript 类型 + 内置角色目录 CHARACTER_CATALOG
+├── vite-env.d.ts               # vite/client 类型引用（import.meta.env）
 ├── assets/
 │   ├── script-default.json     # 默认剧本（= reference/暗藏玄机v2.1.json）
 │   └── replay-default.json     # 默认示例复盘（= reference/复盘数据 (1).json）
 ├── lib/
-│   ├── script.ts               # 剧本解析 + 阵营/颜色/别名/图片代理/reminders
+│   ├── script.ts               # 剧本解析 + 阵营/颜色/别名/reminders
+│   ├── proxy.ts                # 跨域图片代理（统一入口，VITE_IMAGE_PROXY_BASE 可配）
 │   ├── theme.ts                # 长图配色主题系统（5 套 ReplayTheme）
 │   ├── geometry.ts             # 径向布局几何计算
 │   ├── special.ts              # 传奇(Fabled)/奇遇(Traveler)角色目录
@@ -69,6 +72,8 @@ src/
 ```
 
 `reference/` 目录存放「源参考文件」，`src/assets/` 下两份默认 JSON 由其复制而来（保持二者同步）。
+
+另随仓库维护（非前端源码）：`workers/`（Cloudflare Worker 图片代理）、`api/`（Vercel Serverless 图片代理）、`.github/workflows/deploy.yml`（GitHub Pages 部署）、`.env.example`（环境变量模板）。
 
 ---
 
@@ -186,14 +191,28 @@ interface ReplayTheme {
 ## 8. 导出与识图
 
 - **PNG 导出**（`exportUtils.exportLongImage`）：等待字体/图片就绪 → `toPng(node, { pixelRatio })`。工具栏可选 1x/2x/3x 精度。导出前 `setExporting(true)` 隐藏编辑控件。
-- **跨域图片代理**：`vite.config.ts` 内自定义 `imageProxy` 插件，把远程图标转发为 `/__img?src=…` 并附加 CORS 头，避免 `html-to-image` 因跨域污染 canvas。`proxiedImage()`/`proxiedSpecial()` 统一处理。
+- **跨域图片代理**：统一入口 `lib/proxy.ts` 的 `proxiedImage()`（`script.ts` 与 `special.ts` 均由此委托）。代理地址由环境变量 `VITE_IMAGE_PROXY_BASE` 决定：未设置时走 `vite.config.ts` 的 `imageProxy` 中间件（`/__img?src=…`，用于本地 dev/preview）；设置为云端地址时走 Cloudflare Worker / Vercel Serverless（见 §9 部署），用于 GitHub Pages 等纯静态托管。
 - **`?export=1` 只读模式**：`App.tsx` 检测 query 后仅渲染 `<LongImage>`，供无头浏览器/浏览器截图备用。
 - **JSON 导出/导入**：`downloadJSON` / `importJSON`。
 - **识图载入**（`recognize.ts` + `EditorPanel.RecognizeModule`）：调用任意 OpenAI 兼容 vision 接口（`chat/completions`），让模型按 `BotCReplayRecord` 结构输出 JSON，`extractJSON` 剥离 Markdown 代码块后 `importJSON` 载入。配置（baseUrl/apiKey/model）持久化在 `localStorage`。
 
 ---
 
-## 9. 近期改动要点（供快速回归参考）
+## 9. 部署与图片代理（GitHub Pages）
+
+前端是纯静态 Vite 应用，可直接托管到 GitHub Pages；但跨域角色图标需配合云端图片代理。
+
+- **本地开发 / 预览**：无需配置，`proxiedImage()` 默认走 `vite.config.ts` 的 `imageProxy` 中间件 `/__img?src=…`。
+- **云端图片代理（二选一）**：
+  - Cloudflare Worker：`workers/image-proxy.js` + `workers/wrangler.toml`，`cd workers && npx wrangler deploy`。
+  - Vercel Serverless：`api/image-proxy.js`（Edge runtime），导入 Vercel 后地址为 `https://<project>.vercel.app/api/image-proxy`。
+- **前端指向代理**：构建时注入 `VITE_IMAGE_PROXY_BASE`（末尾不带斜杠）：
+  - 命令行：`VITE_IMAGE_PROXY_BASE=https://<worker>.workers.dev npm run build`
+  - GitHub Actions：仓库 Variables 配置 `IMAGE_PROXY_BASE`（`.github/workflows/deploy.yml` 自动注入）。
+- **GitHub Pages 部署**：`vite.config.ts` 已设 `base: '/clock-tower-review-tools/'`（对应仓库名）；推送 `main` 触发 `.github/workflows/deploy.yml`，Settings → Pages 的 Source 选「GitHub Actions」。
+- **安全提示**：代理函数默认 `ALLOWED_HOSTS = []`（放行任意域名，等同开放代理）；生产建议按文件内注释改为白名单。
+
+## 10. 近期改动要点（供快速回归参考）
 
 1. **示例数据替换**：默认剧本 `src/assets/script-default.json` 现为「暗藏玄机 v2.1」（25 角色，含 `_meta.logo`）；示例复盘 `src/assets/replay-default.json` 现为真实对局「暗藏玄机」（12 玩家 / 11 阶段，含 token 挂载、词条、`theme: crimson-hall`）。`sampleData.ts` 改为直接引用该 JSON。
 2. **阶段名简化**：删除阶段名下方「Day · 白昼 ｜ 第 1 阶段」中的「第 X 阶段」部分。
@@ -208,7 +227,7 @@ interface ReplayTheme {
 
 ---
 
-## 10. 开发注意事项
+## 11. 开发注意事项
 
 - 修改主题配色集中在 `lib/theme.ts`；新增主题只需在 `REPLAY_THEMES` 加一项（`id/label` 会同步出现在下拉）。
 - 修改数据标准时需同步：`types.ts`（类型）、`recognize.ts` 的 `SYSTEM_PROMPT`（识图输出结构）、`sampleData.ts` 引用、以及 `reference/` 下的示例 JSON。

@@ -102,6 +102,47 @@ http://localhost:5173/?export=1
 
 ---
 
+## 部署到 GitHub Pages
+
+前端是纯静态 Vite 应用，可直接托管到 GitHub Pages；但跨域角色图标在静态托管下无法再走 Vite 开发中间件，需配合一个云端图片代理（Cloudflare Worker 或 Vercel Serverless，二选一）。
+
+### 1. 部署图片代理
+
+**Cloudflare Worker**：
+
+```bash
+cd workers
+npx wrangler login
+npx wrangler deploy     # 得到 https://<name>.<subdomain>.workers.dev
+```
+
+> 部署前把 `workers/wrangler.toml` 里的 `name` 改成你自己唯一的 Worker 名。
+
+**Vercel Serverless**：将本仓库导入 Vercel，`api/image-proxy.js` 会自动成为 Edge Function，地址为 `https://<project>.vercel.app/api/image-proxy`。
+
+### 2. 配置前端代理地址
+
+构建时注入 `VITE_IMAGE_PROXY_BASE`（末尾不带斜杠）：
+
+```bash
+VITE_IMAGE_PROXY_BASE=https://<你的代理地址> npm run build
+```
+
+或复制 `.env.example` 为 `.env` 填写该变量后 `npm run build`。
+
+### 3. 发布到 Pages
+
+- `vite.config.ts` 已设 `base: '/clock-tower-review-tools/'`（对应仓库名，如仓库名不同请同步修改）。
+- 仓库已包含 `.github/workflows/deploy.yml`：推送 `main` 自动构建并部署。
+- 仓库 Settings → Pages 的 Source 选「GitHub Actions」。
+- 仓库 Settings → Secrets and variables → Actions → Variables 新增 `IMAGE_PROXY_BASE`，值为你的代理地址（CI 构建时注入）。
+
+> 本地 `npm run dev` / `npm run preview` 无需任何配置，图片默认走 Vite 中间件 `/__img`。
+>
+> 安全提示：代理函数默认 `ALLOWED_HOSTS = []`（放行任意域名，等同开放代理）。生产建议按 `workers/image-proxy.js` / `api/image-proxy.js` 内注释改为域名白名单。
+
+---
+
 ## 开发参考
 
 ### 技术栈
@@ -116,9 +157,11 @@ src/
 ├── store.ts                 # zustand 全局状态
 ├── sampleData.ts            # 示例数据（引用 assets/replay-default.json）
 ├── types.ts                 # 类型 + 内置角色目录
+├── vite-env.d.ts            # vite/client 类型（import.meta.env）
 ├── assets/                  # 默认剧本 / 示例复盘 JSON
 ├── lib/
-│   ├── script.ts            # 剧本解析 + 阵营色 + 别名 + 图片代理
+│   ├── script.ts            # 剧本解析 + 阵营色 + 别名
+│   ├── proxy.ts             # 跨域图片代理（VITE_IMAGE_PROXY_BASE 可配）
 │   ├── theme.ts             # 5 套配色主题
 │   ├── geometry.ts          # 径向布局几何
 │   ├── special.ts           # 传奇/奇遇角色目录
@@ -132,11 +175,13 @@ src/
     └── timeline/            # 昼夜复盘流
 ```
 
+另外随仓库维护：`workers/`（Cloudflare Worker 图片代理）、`api/`（Vercel Serverless 图片代理）、`.github/workflows/deploy.yml`（GitHub Pages 部署）、`.env.example`（环境变量模板）。
+
 ### 关键约定
 
 - **状态**：单一 zustand store，`replay` 为根数据；编辑态由 `EditModeContext` + `useEditable()` 控制（导出/只读时为 false）。
 - **配色**：阵营/角色颜色统一走 `lib/script.ts` 的 `teamColor` / `teamTextColor` / `isEvil` / `displayName`；新增主题在 `lib/theme.ts` 的 `REPLAY_THEMES` 增加一项即可。
-- **跨域图片**：远程图标经 `vite.config.ts` 的自定义 `imageProxy` 插件转 `/__img?src=…`，保证 `html-to-image` 可内联导出。
+- **跨域图片**：统一入口 `lib/proxy.ts` 的 `proxiedImage()`，代理地址由 `VITE_IMAGE_PROXY_BASE` 决定——未设置走本地 Vite 中间件 `/__img?src=…`（`vite.config.ts`），设置后走 Cloudflare Worker / Vercel Serverless（见「部署到 GitHub Pages」）。
 - **数据标准改动**：需同步更新 `types.ts`、`recognize.ts` 的 `SYSTEM_PROMPT`、`sampleData.ts` 及 `reference/` 示例。
 
 更完整的架构说明与近期改动记录见 [`CLAUDE.md`](CLAUDE.md)。
