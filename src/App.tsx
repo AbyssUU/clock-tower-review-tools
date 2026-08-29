@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ImageDown, FileJson, Maximize2, ZoomIn, ZoomOut, Loader2, MoveHorizontal } from 'lucide-react'
+import { ImageDown, FileJson, Maximize2, ZoomIn, ZoomOut, Loader2, MoveHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useReplayStore } from './store'
 import LongImage from './components/export/LongImage'
 import EditorPanel from './components/editor/EditorPanel'
@@ -17,6 +17,7 @@ export default function App() {
   const [naturalH, setNaturalH] = useState(0)
   const [exporting, setExporting] = useState(false)
   const [quality, setQuality] = useState(2) // PNG 精度倍率：1/2/3 倍
+  const [sidebarOpen, setSidebarOpen] = useState(true) // 左侧编辑栏展开/收起
 
   // 独立导出模式：?export=1 时仅渲染长图（供无头浏览器截图 / 调试）
   const standalone = new URLSearchParams(window.location.search).has('export')
@@ -55,6 +56,13 @@ export default function App() {
     <div className="flex h-screen flex-col bg-abyss-950">
       {/* 顶部工具栏 */}
       <header className="flex shrink-0 items-center gap-4 border-b border-brass-700/30 bg-abyss-900/80 px-4 py-2.5">
+        <button
+          onClick={() => setSidebarOpen((v) => !v)}
+          className="rounded-md border border-abyss-700 p-1.5 text-abyss-700 transition hover:text-brass-300"
+          title={sidebarOpen ? '收起编辑栏' : '展开编辑栏'}
+        >
+          {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+        </button>
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-full border border-brass-600/60 bg-abyss-900 shadow-brass-glow">
             <span className="h-3.5 w-3.5 rotate-45 bg-brass-400" />
@@ -146,14 +154,16 @@ export default function App() {
 
       {/* 主体 */}
       <div className="flex min-h-0 flex-1">
-        {/* 左侧编辑器 */}
-        <aside className="w-[430px] shrink-0 border-r border-abyss-800 bg-abyss-900/40">
-          <EditorPanel />
-        </aside>
+        {/* 左侧编辑器（可整体收起） */}
+        {sidebarOpen && (
+          <aside className="w-[430px] shrink-0 border-r border-abyss-800 bg-abyss-900/40">
+            <EditorPanel />
+          </aside>
+        )}
 
         {/* 右侧预览 */}
         <main className="min-w-0 flex-1 overflow-auto bg-abyss-950" style={{ backgroundImage: 'radial-gradient(circle, #161b22 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
-          <div style={{ width: imageWidth * zoom, height: naturalH * zoom }}>
+          <div className="mx-auto py-8" style={{ width: imageWidth * zoom, height: naturalH * zoom }}>
             <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top left', width: imageWidth }}>
               <LongImage ref={exportRef} replay={replay} script={script} screenshot={screenshot} editable />
             </div>

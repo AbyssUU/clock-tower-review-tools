@@ -1,8 +1,16 @@
 import { forwardRef, useMemo } from 'react'
 import { Compass, BookOpen, Image as ImageIcon, Plus, X } from 'lucide-react'
-import type { BotCReplayRecord, ScriptCharacter } from '../../types'
+import type { BotCReplayRecord, ScriptCharacter, ReorderableSection } from '../../types'
 import { buildCharacterMap } from '../../lib/script'
-import { useTheme } from '../../lib/theme'
+import {
+  useTheme,
+  useSectionAccent,
+  useAccent,
+  headingColor,
+  SectionAccentContext,
+  DEFAULT_SECTION_ORDER,
+  DEFAULT_VIGNETTE,
+} from '../../lib/theme'
 import { useReplayStore } from '../../store'
 import { EditModeContext, useEditable } from '../editable/editMode'
 import { EditableText, EditableTextarea } from '../editable/Editable'
@@ -42,6 +50,21 @@ const LongImage = forwardRef<HTMLDivElement, LongImageProps>(function LongImage(
 
   // 配色主题：控制页面背景、氛围光晕与外框
   const theme = useTheme()
+  const heading = headingColor(theme)
+
+  // 各区块强调色（含用户在「布局」标签里的覆盖）
+  const headerAccent = useSectionAccent('header')
+  const grimoireAccent = useSectionAccent('grimoire')
+  const timelineAccent = useSectionAccent('timeline')
+  const snapshotAccent = useSectionAccent('snapshot')
+  const storytellerAccent = useSectionAccent('storyteller')
+
+  // 主体区块显示顺序（默认：截图 → 魔典 → 时间线 → 手记）
+  const order: ReorderableSection[] = replay.meta.sectionOrder?.length ? replay.meta.sectionOrder : DEFAULT_SECTION_ORDER
+
+  // 手记为空且非编辑态时，整个手记区块（含分隔线）不显示
+  const hasNotes = (replay.customSections?.length ?? 0) > 0
+  const showStoryteller = editable || hasNotes
 
   return (
     <EditModeContext.Provider value={editable}>
@@ -66,9 +89,7 @@ const LongImage = forwardRef<HTMLDivElement, LongImageProps>(function LongImage(
         />
         <div
           className="pointer-events-none absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(0,0,0,0.46) 100%)',
-          }}
+          style={{ background: theme.vignette ?? DEFAULT_VIGNETTE }}
         />
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.04]"
@@ -85,46 +106,63 @@ const LongImage = forwardRef<HTMLDivElement, LongImageProps>(function LongImage(
         <CornerOrnament position="br" />
 
         <div className="relative z-10 flex flex-col gap-5 px-14 py-10">
-          <Header replay={replay} />
+          <SectionAccentContext.Provider value={headerAccent}>
+            <Header replay={replay} />
+          </SectionAccentContext.Provider>
 
-          <OrnateDivider label="GRIMOIRE" />
-
-          {/* ===== 复盘魔典（座位 + 伪装 + 传奇/奇遇） ===== */}
-          <section className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <Compass className="h-5 w-5" style={{ color: theme.accent }} />
-              <h2 className="font-display text-xl font-bold tracking-[0.2em]" style={{ color: theme.accentSoft }}>复盘魔典</h2>
-              <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${theme.accent}99, transparent)` }} />
-              <span className="text-xs" style={{ color: theme.accent }}>{initialPlayers.length} 名玩家</span>
-            </div>
-
-            <div className="flex justify-center">
-              <RadialWheel players={initialPlayers} charMap={charMap} aliases={aliases} size={wheelSize} />
-            </div>
-
-            <GrimoireModulesRow evilSetup={evilSetup} charMap={charMap} aliases={aliases} />
-          </section>
-
-          <OrnateDivider label="TIMELINE" />
-
-          <PhaseTimeline phases={phases} glossary={replay.customGlossary} charMap={charMap} aliases={aliases} playerNames={playerNames} seatCharacters={seatCharacters} />
-
-          {screenshot && (
-            <>
-              <OrnateDivider label="SNAPSHOT" />
-              <section className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                  <ImageIcon className="h-5 w-5" style={{ color: theme.accent }} />
-                  <h2 className="font-display text-xl font-bold tracking-[0.2em]" style={{ color: theme.accentSoft }}>复盘截图</h2>
-                  <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${theme.accent}99, transparent)` }} />
-                </div>
-                <img src={screenshot} alt="复盘截图" className="w-full rounded-xl border border-brass-700/40" />
-              </section>
-            </>
-          )}
-
-          <OrnateDivider label="STORYTELLER" />
-          <StorytellerNotes />
+          {order.map((key) => {
+            if (key === 'grimoire') {
+              return (
+                <SectionAccentContext.Provider key={key} value={grimoireAccent}>
+                  <OrnateDivider label="GRIMOIRE" />
+                  <section className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      <Compass className="h-5 w-5" style={{ color: grimoireAccent.accent }} />
+                      <h2 className="font-display text-xl font-bold tracking-[0.2em]" style={{ color: heading }}>复盘魔典</h2>
+                      <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${grimoireAccent.accent}99, transparent)` }} />
+                      <span className="text-xs" style={{ color: grimoireAccent.accent }}>{initialPlayers.length} 名玩家</span>
+                    </div>
+                    <div className="flex justify-center">
+                      <RadialWheel players={initialPlayers} charMap={charMap} aliases={aliases} size={wheelSize} />
+                    </div>
+                    <GrimoireModulesRow evilSetup={evilSetup} charMap={charMap} aliases={aliases} />
+                  </section>
+                </SectionAccentContext.Provider>
+              )
+            }
+            if (key === 'timeline') {
+              return (
+                <SectionAccentContext.Provider key={key} value={timelineAccent}>
+                  <OrnateDivider label="TIMELINE" />
+                  <PhaseTimeline phases={phases} glossary={replay.customGlossary} charMap={charMap} aliases={aliases} playerNames={playerNames} seatCharacters={seatCharacters} />
+                </SectionAccentContext.Provider>
+              )
+            }
+            if (key === 'snapshot' && screenshot) {
+              return (
+                <SectionAccentContext.Provider key={key} value={snapshotAccent}>
+                  <OrnateDivider label="SNAPSHOT" />
+                  <section className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      <ImageIcon className="h-5 w-5" style={{ color: snapshotAccent.accent }} />
+                      <h2 className="font-display text-xl font-bold tracking-[0.2em]" style={{ color: heading }}>复盘截图</h2>
+                      <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${snapshotAccent.accent}99, transparent)` }} />
+                    </div>
+                    <img src={screenshot} alt="复盘截图" className="w-full rounded-xl border border-brass-700/40" />
+                  </section>
+                </SectionAccentContext.Provider>
+              )
+            }
+            if (key === 'storyteller' && showStoryteller) {
+              return (
+                <SectionAccentContext.Provider key={key} value={storytellerAccent}>
+                  <OrnateDivider label="STORYTELLER" />
+                  <StorytellerNotes />
+                </SectionAccentContext.Provider>
+              )
+            }
+            return null
+          })}
 
           <footer className="flex flex-col items-center gap-1.5 border-t pt-5 pb-1" style={{ borderColor: `${theme.accent}44` }}>
             <span className="font-display text-xs tracking-[0.3em]" style={{ color: theme.accent }}>BLOOD ON THE CLOCKTOWER · GRIMOIRE REPLAY</span>
@@ -140,6 +178,8 @@ const LongImage = forwardRef<HTMLDivElement, LongImageProps>(function LongImage(
 function StorytellerNotes() {
   const editable = useEditable()
   const theme = useTheme()
+  const accent = useAccent()
+  const heading = headingColor(theme)
   const sections = useReplayStore((s) => s.replay.customSections) ?? []
 
   const update = (list: { title: string; content: string }[]) => {
@@ -148,17 +188,20 @@ function StorytellerNotes() {
   const patch = (i: number, p: Partial<{ title: string; content: string }>) =>
     update(sections.map((s, idx) => (idx === i ? { ...s, ...p } : s)))
 
+  // 手记为空且非编辑态（导出/只读）：整个区块不显示（避免出现虚线空框）
+  if (!editable && sections.length === 0) return null
+
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
-        <BookOpen className="h-5 w-5" style={{ color: theme.accent }} />
-        <h2 className="font-display text-xl font-bold tracking-[0.2em]" style={{ color: theme.accentSoft }}>说书人复盘手记</h2>
-        <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${theme.accent}99, transparent)` }} />
+        <BookOpen className="h-5 w-5" style={{ color: accent.accent }} />
+        <h2 className="font-display text-xl font-bold tracking-[0.2em]" style={{ color: heading }}>说书人复盘手记</h2>
+        <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${accent.accent}99, transparent)` }} />
         {editable && (
           <button
             onClick={() => update([...sections, { title: '新章节', content: '' }])}
             className="flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-semibold transition hover:opacity-80"
-            style={{ borderColor: `${theme.accent}55`, color: theme.accent }}
+            style={{ borderColor: `${accent.accent}55`, color: accent.accent }}
           >
             <Plus className="h-3.5 w-3.5" /> 添加章节
           </button>
@@ -169,28 +212,28 @@ function StorytellerNotes() {
         {sections.length === 0 && (
           <p
             className="col-span-2 rounded-xl border border-dashed px-4 py-6 text-center text-sm"
-            style={{ borderColor: `${theme.card.border}66`, color: theme.accent, opacity: 0.7 }}
+            style={{ borderColor: `${theme.card.border}66`, color: accent.accent, opacity: 0.7 }}
           >
-            {editable ? '暂无手记，点击右上角「添加章节」开始记录。' : '本局未记录说书人手记。'}
+            暂无手记，点击右上角「添加章节」开始记录。
           </p>
         )}
         {sections.map((s, i) => (
           <div
             key={i}
             className="group relative rounded-xl border p-5"
-            style={{ borderColor: theme.card.border, background: theme.card.bg, boxShadow: `inset 0 0 20px ${theme.accent}0d` }}
+            style={{ borderColor: theme.card.border, background: theme.card.bg, boxShadow: `inset 0 0 20px ${accent.accent}0d` }}
           >
             {editable && (
               <button
                 onClick={() => update(sections.filter((_, idx) => idx !== i))}
                 className="absolute right-2.5 top-2.5 rounded p-1 opacity-0 transition hover:opacity-100 group-hover:opacity-100"
-                style={{ color: theme.accent }}
+                style={{ color: accent.accent }}
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
             <div className="mb-2 flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rotate-45" style={{ background: theme.accent }} />
+              <span className="h-1.5 w-1.5 rotate-45" style={{ background: accent.accent }} />
               <EditableText
                 value={s.title}
                 onChange={(v) => patch(i, { title: v })}

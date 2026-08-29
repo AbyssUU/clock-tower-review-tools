@@ -1,4 +1,6 @@
+import { createContext, useContext } from 'react'
 import { useReplayStore } from '../store'
+import type { SectionKey, ReorderableSection } from '../types'
 
 // ============ 长图配色主题 ============
 // 每个主题提供一套完整的深色配色：页面背景、主强调色、昼夜阶段、卡片（说书人手记）等。
@@ -29,7 +31,9 @@ export interface ReplayTheme {
   glowBottom: string // 底部氛围光晕
   frame: string // 外框描边
   accent: string // 主强调色（标题 / 分隔线 / 装饰）
-  accentSoft: string // 浅强调色（标题文字）
+  accentSoft: string // 浅强调色（深色底上的标题文字，如暗色 Header）
+  heading?: string // 长图区块标题文字色（在页面背景上可读，浅色主题需为深色；缺省回退 accentSoft）
+  vignette?: string // 页面边缘暗角；浅色主题用更淡的暗角（缺省使用深色默认值）
   night: PhasePalette
   day: PhasePalette
   card: CardPalette // 说书人手记等卡片
@@ -181,9 +185,77 @@ export const REPLAY_THEMES: ReplayTheme[] = [
     },
     card: { bg: 'rgba(18,12,28,0.6)', border: 'rgba(184,154,224,0.25)', title: '#DCCBF0', text: '#d8cde6' },
   },
+  {
+    id: 'parchment',
+    label: '羊皮纸',
+    bg: 'linear-gradient(180deg, #f7efe0 0%, #f3e7cf 25%, #f5ecd9 50%, #efe3c9 100%)',
+    glowTop: 'rgba(190,150,80,0.14)',
+    glowBottom: 'rgba(150,110,60,0.10)',
+    frame: 'rgba(120,95,55,0.28)',
+    accent: '#8a6a1a',
+    accentSoft: '#EBD28A',
+    heading: '#5a4312',
+    vignette: 'radial-gradient(ellipse at 50% 45%, transparent 62%, rgba(90,70,30,0.14) 100%)',
+    night: {
+      bg: 'linear-gradient(165deg, #2a2418 0%, #3a3020 55%, #1f1a10 100%)',
+      border: 'rgba(150,120,60,0.4)',
+      title: '#efe5cd',
+      text: '#d8cab0',
+      muted: '#a08a5a',
+      icon: '#d8bd82',
+      glow: 'radial-gradient(circle at 85% 15%, rgba(180,140,80,0.18), transparent 45%), radial-gradient(circle at 15% 85%, rgba(120,90,50,0.15), transparent 50%)',
+    },
+    day: {
+      bg: 'linear-gradient(165deg, #faf4e6 0%, #f2e7cd 55%, #e8dab6 100%)',
+      border: 'rgba(160,120,60,0.35)',
+      title: '#4a3a1a',
+      text: '#4e3f20',
+      muted: '#9a7b3a',
+      icon: '#8a6a1a',
+      glow: 'radial-gradient(circle at 85% 15%, rgba(255,255,255,0.7), transparent 45%), radial-gradient(circle at 15% 85%, rgba(160,120,60,0.15), transparent 50%)',
+    },
+    card: { bg: 'rgba(255,250,240,0.72)', border: 'rgba(138,106,26,0.3)', title: '#5a4312', text: '#4a3d22' },
+  },
+  {
+    id: 'blank',
+    label: '空白极简',
+    bg: '#ffffff',
+    glowTop: 'rgba(0,0,0,0.03)',
+    glowBottom: 'rgba(0,0,0,0.03)',
+    frame: 'rgba(0,0,0,0.10)',
+    accent: '#6b6b6b',
+    accentSoft: '#d9d9d9',
+    heading: '#2a2a2a',
+    vignette: 'radial-gradient(ellipse at 50% 45%, transparent 70%, rgba(0,0,0,0.06) 100%)',
+    night: {
+      bg: 'linear-gradient(165deg, #2a2e33 0%, #3a3f45 55%, #202327 100%)',
+      border: 'rgba(140,145,150,0.4)',
+      title: '#eef0f2',
+      text: '#d5d8dc',
+      muted: '#9aa0a6',
+      icon: '#c4c9ce',
+      glow: 'radial-gradient(circle at 85% 15%, rgba(160,165,170,0.16), transparent 45%), radial-gradient(circle at 15% 85%, rgba(120,125,130,0.12), transparent 50%)',
+    },
+    day: {
+      bg: 'linear-gradient(165deg, #ffffff 0%, #f5f6f7 55%, #ecedef 100%)',
+      border: 'rgba(120,125,130,0.35)',
+      title: '#2a2a2a',
+      text: '#3a3a3a',
+      muted: '#7a7a7a',
+      icon: '#5a5a5a',
+      glow: 'radial-gradient(circle at 85% 15%, rgba(255,255,255,0.9), transparent 45%), radial-gradient(circle at 15% 85%, rgba(120,125,130,0.1), transparent 50%)',
+    },
+    card: { bg: 'rgba(0,0,0,0.03)', border: 'rgba(0,0,0,0.12)', title: '#2a2a2a', text: '#3a3a3a' },
+  },
 ]
 
 export const DEFAULT_THEME_ID = 'midnight-gold'
+
+/** 长图主体区块默认顺序：截图 → 魔典 → 时间线 → 手记（截图默认置于魔典上方） */
+export const DEFAULT_SECTION_ORDER: ReorderableSection[] = ['snapshot', 'grimoire', 'timeline', 'storyteller']
+
+/** 长图边缘暗角默认值（深色主题） */
+export const DEFAULT_VIGNETTE = 'radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(0,0,0,0.46) 100%)'
 
 export function getTheme(id?: string): ReplayTheme {
   return REPLAY_THEMES.find((t) => t.id === id) ?? REPLAY_THEMES[0]
@@ -193,4 +265,53 @@ export function getTheme(id?: string): ReplayTheme {
 export function useTheme(): ReplayTheme {
   const id = useReplayStore((s) => s.replay.meta.theme)
   return getTheme(id)
+}
+
+/** 区块标题文字色：在页面背景上保持可读（浅色主题为深色，缺省回退 accentSoft） */
+export function headingColor(theme: ReplayTheme): string {
+  return theme.heading ?? theme.accentSoft
+}
+
+/** 是否为浅色/空白主题（设置了 heading 字段即浅色背景，需用深色前景） */
+export function isLightTheme(theme: ReplayTheme): boolean {
+  return !!theme.heading
+}
+
+/** 将 hex 颜色向白色混合（ratio 0~1），用于派生强调色的浅色变体 */
+export function tint(hex: string, ratio: number): string {
+  const h = hex.replace('#', '')
+  if (h.length !== 6 || !/^[0-9a-fA-F]{6}$/.test(h)) return hex
+  const n = parseInt(h, 16)
+  const r = (n >> 16) & 255
+  const g = (n >> 8) & 255
+  const b = n & 255
+  const mix = (c: number) => Math.round(c + (255 - c) * ratio)
+  return `#${((mix(r) << 16) | (mix(g) << 8) | mix(b)).toString(16).padStart(6, '0')}`
+}
+
+// ============ 各模块强调色 ============
+// 长图每个区块（标题 / 魔典 / 时间线 / 截图 / 手记）可单独覆盖强调色；
+// 未覆盖时跟随主题 accent。区块标题文字色仍用 headingColor（保证可读）。
+
+interface AccentColors {
+  accent: string
+  accentSoft: string
+}
+
+/** 区块强调色上下文（由 LongImage 按区块注入，子组件经 useAccent 读取） */
+export const SectionAccentContext = createContext<AccentColors | null>(null)
+
+/** 读取当前区块强调色（无上下文时回退主题 accent） */
+export function useAccent(): AccentColors {
+  const theme = useTheme()
+  const ctx = useContext(SectionAccentContext)
+  return ctx ?? { accent: theme.accent, accentSoft: theme.accentSoft }
+}
+
+/** 计算某个区块的强调色（含用户覆盖） */
+export function useSectionAccent(section: SectionKey): AccentColors {
+  const theme = useTheme()
+  const override = useReplayStore((s) => s.replay.meta.sectionAccents?.[section])
+  if (override) return { accent: override, accentSoft: tint(override, 0.35) }
+  return { accent: theme.accent, accentSoft: theme.accentSoft }
 }

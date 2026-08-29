@@ -1,9 +1,8 @@
-import { useTheme } from '../../lib/theme'
+import { useAccent } from '../../lib/theme'
 
-// 华丽装饰分隔线：中央菱形 + 两侧渐隐线 + 端点小钻（随主题主强调色变化）
+// 华丽装饰分隔线：中央菱形 + 两侧渐隐线 + 端点小钻（随区块强调色变化）
 export default function OrnateDivider({ label }: { label?: string }) {
-  const theme = useTheme()
-  const { accent, accentSoft } = theme
+  const { accent, accentSoft } = useAccent()
   return (
     <div className="flex items-center gap-4 py-2">
       <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${accent}88, ${accent})` }} />

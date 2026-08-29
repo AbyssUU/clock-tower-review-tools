@@ -92,6 +92,18 @@ export interface ModuleVisibility {
   traveler?: boolean // 奇遇角色（默认不显示，可添加）
 }
 
+// 7.7 长图主体区块（可排序；header 固定最上、footer 固定最下）
+export type SectionKey = 'header' | 'grimoire' | 'timeline' | 'snapshot' | 'storyteller'
+export type ReorderableSection = Exclude<SectionKey, 'header'>
+export const BODY_SECTIONS: ReorderableSection[] = ['grimoire', 'timeline', 'snapshot', 'storyteller']
+export const SECTION_LABELS: Record<SectionKey, string> = {
+  header: '标题',
+  grimoire: '复盘魔典',
+  timeline: '时间线',
+  snapshot: '复盘截图',
+  storyteller: '说书人手记',
+}
+
 // 8. 完整复盘档案根对象
 export interface BotCReplayRecord {
   meta: {
@@ -105,6 +117,8 @@ export interface BotCReplayRecord {
     titleMode?: 'logo' | 'text' // 标题渲染方式：logo 或文字
     imageWidth?: number // 长图宽度（px），默认 1080
     theme?: string // 长图配色主题 id（见 src/lib/theme.ts），默认 midnight-gold
+    sectionOrder?: ReorderableSection[] // 长图主体区块显示顺序（默认：截图 → 魔典 → 时间线 → 手记）
+    sectionAccents?: Partial<Record<SectionKey, string>> // 各模块强调色覆盖（hex），未设置跟随主题
   }
   scriptMeta: ScriptMeta
   evilSetup: EvilSetupInfo

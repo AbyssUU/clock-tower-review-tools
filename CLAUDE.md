@@ -48,7 +48,7 @@ src/
 ├── lib/
 │   ├── script.ts               # 剧本解析 + 阵营/颜色/别名/reminders
 │   ├── proxy.ts                # 跨域图片代理（统一入口，VITE_IMAGE_PROXY_BASE 可配）
-│   ├── theme.ts                # 长图配色主题系统（5 套 ReplayTheme）
+│   ├── theme.ts                # 长图配色主题系统（7 套 ReplayTheme：5 深色 + 2 浅色/空白）
 │   ├── geometry.ts             # 径向布局几何计算
 │   ├── special.ts              # 传奇(Fabled)/奇遇(Traveler)角色目录
 │   ├── exportUtils.ts          # PNG 导出 + JSON 下载
@@ -90,6 +90,8 @@ interface BotCReplayRecord {
     titleMode?: 'logo' | 'text'    // 标题渲染：logo 或文字
     imageWidth?: number            // 长图宽度 px，默认 1080
     theme?: string                 // 配色主题 id（见 lib/theme.ts），默认 midnight-gold
+    sectionOrder?: ReorderableSection[] // 主体区块顺序（默认：截图 → 魔典 → 时间线 → 手记）
+    sectionAccents?: Partial<Record<SectionKey, string>> // 各模块强调色覆盖（header/grimoire/timeline/snapshot/storyteller）
   }
   scriptMeta: ScriptMeta          // { scriptName, scriptId?, author?, logo?, version? }
   evilSetup: EvilSetupInfo        // { demonBluffs, lunaticBluffs?, evilKnowledgeNotes?, customBluffs? }
@@ -139,14 +141,16 @@ interface BotCReplayRecord {
 
 ## 5. 长图渲染与主题系统
 
-`LongImage.tsx` 是长图根组件，自上而下依次渲染：
+`LongImage.tsx` 是长图根组件，Header 固定最上、footer 固定最下，中间四个主体区块按 `replay.meta.sectionOrder` 顺序渲染（默认：截图 → 魔典 → 时间线 → 手记，可由「布局」标签拖拽 / 上下移动调整）：
 
 1. **Header** — 标题（logo 或文字）+ 胜负徽章 + 元信息 + MVP + 胜负判定。
-2. **OrnateDivider**（GRIMOIRE）→ **RadialWheel**（魔典轮盘）+ **GrimoireModulesRow**（伪装/传奇/奇遇）。
-3. **OrnateDivider**（TIMELINE）→ **PhaseTimeline**（昼夜复盘流）。
-4. **OrnateDivider**（SNAPSHOT，可选截图）。
-5. **OrnateDivider**（STORYTELLER）→ **StorytellerNotes**（2 列横向手记）。
+2. **复盘截图**（SNAPSHOT，有截图时显示）。
+3. **复盘魔典**（GRIMOIRE）→ **RadialWheel**（魔典轮盘）+ **GrimoireModulesRow**（伪装/传奇/奇遇）。
+4. **时间线**（TIMELINE）→ **PhaseTimeline**（昼夜复盘流）。
+5. **说书人手记**（STORYTELLER）→ **StorytellerNotes**（2 列横向手记；为空且非编辑态时整块不渲染）。
 6. **footer**。
+
+每个主体区块都由 `SectionAccentContext.Provider` 包裹，区块强调色可经 `replay.meta.sectionAccents` 单独覆盖（见下文）。
 
 ### 主题系统（lib/theme.ts）
 
@@ -161,7 +165,9 @@ interface ReplayTheme {
 }
 ```
 
-5 套内置主题：`midnight-gold 暗夜金`（默认）、`abyss-blue 深海蓝`、`jade-night 翡翠夜`、`crimson-hall 绯红殿`、`amethyst 紫晶`。
+7 套内置主题：5 套深色（`midnight-gold 暗夜金`（默认）、`abyss-blue 深海蓝`、`jade-night 翡翠夜`、`crimson-hall 绯红殿`、`amethyst 紫晶`）+ 2 套浅色/空白（`parchment 羊皮纸`、`blank 空白极简`）。浅色主题通过 `heading`（区块标题文字，深色）与 `vignette`（更淡的暗角）保持可读性。
+
+**各模块强调色**：`replay.meta.sectionAccents` 可为 `header/grimoire/timeline/snapshot/storyteller` 任一区块覆盖强调色（未设置跟随主题 `accent`）。`useSectionAccent(section)` 读取覆盖值，`useAccent()` 读取当前区块（由 `SectionAccentContext` 注入）的强调色；区块标题文字色统一用 `headingColor(theme)`（浅色主题为深色），保证在任意背景下可读。
 
 **可读性设计原则**：夜晚阶段保持深色底 + 浅色文字，白昼阶段保持浅色底 + 深色文字，从而在任意主题下都保证文字对比度；强调色、分隔线、图标、卡片均随主题切换。`teamTextColor()` 提供比 `teamColor()` 更亮的文字色，用于深色底上的角色名/token 文字。
 
@@ -224,6 +230,7 @@ interface ReplayTheme {
 8. **说书人手记横向排列**：`grid grid-cols-2 gap-4`，2 个模块一行。
 9. **logo 自动读取**：剧本 `_meta.logo` 存在则默认采用并自动居中；无则用文字标题；可手动切换。
 10. **删除左侧「填写座位」区块**：座位号改为在「玩家」标签内维护，UI 排布已相应调整。
+11. **浅色/空白主题 + 模块强调色 + 区块排序 + 布局标签**：新增 `parchment 羊皮纸`、`blank 空白极简` 两套浅色主题；`replay.meta.sectionOrder` 控制主体区块顺序（截图默认置顶），`sectionAccents` 覆盖各模块强调色；新增左侧「布局」标签（拖拽 + 上下按钮排序 + 颜色选择）；说书人手记为空时导出不渲染虚线框；左侧编辑栏支持整体收起。
 
 ---
 

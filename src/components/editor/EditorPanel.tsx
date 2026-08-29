@@ -21,19 +21,20 @@ import {
   Loader2,
   ChevronDown,
   GripVertical,
+  LayoutTemplate,
 } from 'lucide-react'
 import { useReplayStore, nextId } from '../../store'
-import type { ReplayPlayer, GamePhase, LogEntry } from '../../types'
-import { CHARACTER_CATALOG } from '../../types'
+import type { ReplayPlayer, GamePhase, LogEntry, SectionKey, ReorderableSection } from '../../types'
+import { CHARACTER_CATALOG, BODY_SECTIONS, SECTION_LABELS } from '../../types'
 import { buildCharacterMap, characterImage, teamColor } from '../../lib/script'
-import { REPLAY_THEMES } from '../../lib/theme'
+import { REPLAY_THEMES, DEFAULT_SECTION_ORDER, getTheme } from '../../lib/theme'
 import { FABLED_CATALOG, TRAVELER_CATALOG } from '../../lib/special'
 import { downloadJSON } from '../../lib/exportUtils'
 import { recognizeReplayImage, extractJSON, type VisionConfig } from '../../lib/recognize'
 import CharacterIcon from '../board/CharacterIcon'
 import { Field, TextInput, TextArea, Select } from './Field'
 
-type TabKey = 'script' | 'meta' | 'players' | 'phases' | 'data' | 'extras'
+type TabKey = 'script' | 'meta' | 'players' | 'phases' | 'extras' | 'layout' | 'data'
 
 const TABS: { key: TabKey; label: string; icon: typeof Settings2 }[] = [
   { key: 'script', label: '剧本', icon: BookMarked },
@@ -41,6 +42,7 @@ const TABS: { key: TabKey; label: string; icon: typeof Settings2 }[] = [
   { key: 'players', label: '玩家', icon: Users },
   { key: 'phases', label: '阶段日志', icon: Layers },
   { key: 'extras', label: '扩展', icon: Sparkles },
+  { key: 'layout', label: '布局', icon: LayoutTemplate },
   { key: 'data', label: '导入导出', icon: Database },
 ]
 
@@ -78,6 +80,7 @@ export default function EditorPanel() {
         {tab === 'players' && <PlayersTab />}
         {tab === 'phases' && <PhasesTab />}
         {tab === 'extras' && <ExtrasTab />}
+        {tab === 'layout' && <LayoutTab />}
         {tab === 'data' && <DataTab />}
       </div>
     </div>
@@ -475,33 +478,35 @@ function PhasesTab() {
                 }}
                 className={`flex flex-col gap-2 rounded border p-2 transition ${isDragging ? 'border-brass-500/60 bg-brass-500/5 opacity-50' : 'border-abyss-800 bg-abyss-950/50'}`}
               >
-                {/* 第一行：类型 + 投票 + 标签（与时间线单行顺序一致） */}
-                <div className="flex flex-wrap items-center gap-2">
+                {/* 第一行：类型 + 投票 + 标签（与时间线单行顺序一致；统一「标签在上、输入在下」并在同一水平线对齐） */}
+                <div className="flex flex-wrap items-end gap-2">
                   <span
                     draggable
                     onDragStart={(e) => { setDragged({ phaseId: ph.id, logId: log.id }); e.dataTransfer.effectAllowed = 'move' }}
                     onDragEnd={() => setDragged(null)}
-                    className="cursor-grab text-abyss-700 hover:text-brass-300"
+                    className="mb-1.5 cursor-grab text-abyss-700 hover:text-brass-300"
                     title="拖动排序"
                   >
                     <GripVertical className="h-4 w-4" />
                   </span>
-                  <Select
-                    className="w-28"
-                    value={log.type ?? ''}
-                    onChange={(e) => updateLog(ph.id, log.id, { type: e.target.value ? (e.target.value as LogEntry['type']) : undefined })}
-                  >
-                    <option value="">无</option>
-                    <option value="st_action">说书人动作</option>
-                    <option value="info">信息</option>
-                    <option value="player_speech">发言</option>
-                    <option value="nomination">提名</option>
-                    <option value="execution">处决</option>
-                    <option value="attack">攻击</option>
-                    <option value="death">死亡</option>
-                    <option value="comment">复盘</option>
-                    <option value="custom">自定义</option>
-                  </Select>
+                  <Field label="类型">
+                    <Select
+                      className="w-28"
+                      value={log.type ?? ''}
+                      onChange={(e) => updateLog(ph.id, log.id, { type: e.target.value ? (e.target.value as LogEntry['type']) : undefined })}
+                    >
+                      <option value="">无</option>
+                      <option value="st_action">说书人动作</option>
+                      <option value="info">信息</option>
+                      <option value="player_speech">发言</option>
+                      <option value="nomination">提名</option>
+                      <option value="execution">处决</option>
+                      <option value="attack">攻击</option>
+                      <option value="death">死亡</option>
+                      <option value="comment">复盘</option>
+                      <option value="custom">自定义</option>
+                    </Select>
+                  </Field>
                   <Field label="投票">
                     <TextInput
                       className="w-16"
@@ -691,6 +696,119 @@ function ExtrasTab() {
             <TextArea rows={3} value={s.content} onChange={(e) => updateSection(i, { content: e.target.value })} />
           </div>
         ))}
+      </section>
+    </div>
+  )
+}
+
+/* ============ 布局：区块顺序 + 各模块强调色 ============ */
+function LayoutTab() {
+  const replay = useReplayStore((s) => s.replay)
+  const updateMeta = useReplayStore((s) => s.updateMeta)
+  const order: ReorderableSection[] = replay.meta.sectionOrder?.length ? replay.meta.sectionOrder : DEFAULT_SECTION_ORDER
+  const accents = replay.meta.sectionAccents ?? {}
+  const themeAccent = getTheme(replay.meta.theme).accent
+  const [dragged, setDragged] = useState<ReorderableSection | null>(null)
+
+  const setOrder = (next: ReorderableSection[]) => updateMeta({ sectionOrder: next })
+
+  const move = (key: ReorderableSection, dir: -1 | 1) => {
+    const i = order.indexOf(key)
+    const j = i + dir
+    if (i < 0 || j < 0 || j >= order.length) return
+    const next = [...order]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    setOrder(next)
+  }
+
+  const moveTo = (from: ReorderableSection, to: ReorderableSection) => {
+    if (from === to) return
+    const next = [...order]
+    const fi = next.indexOf(from)
+    const ti = next.indexOf(to)
+    if (fi < 0 || ti < 0) return
+    const [m] = next.splice(fi, 1)
+    next.splice(ti, 0, m)
+    setOrder(next)
+  }
+
+  const setAccent = (key: SectionKey, color: string) => updateMeta({ sectionAccents: { ...accents, [key]: color } })
+  const clearAccent = (key: SectionKey) => {
+    const next = { ...accents }
+    delete next[key]
+    updateMeta({ sectionAccents: next })
+  }
+
+  const accentRows: { key: SectionKey; label: string }[] = [
+    { key: 'header', label: SECTION_LABELS.header },
+    ...BODY_SECTIONS.map((k) => ({ key: k, label: SECTION_LABELS[k] })),
+  ]
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* 区块顺序 */}
+      <section className="flex flex-col gap-3">
+        <h3 className="label-caps">长图区块顺序</h3>
+        <p className="text-[11px] text-abyss-700">拖拽或用上下按钮调整顺序；标题固定最上、页脚固定最下。截图默认排在魔典上方。</p>
+        <div className="flex flex-col gap-1.5">
+          {order.map((key) => {
+            const isDragging = dragged === key
+            return (
+              <div
+                key={key}
+                onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
+                onDrop={(e) => { e.preventDefault(); if (dragged && dragged !== key) moveTo(dragged, key); setDragged(null) }}
+                className={`flex items-center gap-2 rounded-md border px-2.5 py-2 ${isDragging ? 'border-brass-500/60 bg-brass-500/5 opacity-50' : 'border-abyss-800 bg-abyss-900/50'}`}
+              >
+                <span
+                  draggable
+                  onDragStart={(e) => { setDragged(key); e.dataTransfer.effectAllowed = 'move' }}
+                  onDragEnd={() => setDragged(null)}
+                  className="cursor-grab text-abyss-700 hover:text-brass-300"
+                  title="拖动排序"
+                >
+                  <GripVertical className="h-4 w-4" />
+                </span>
+                <span className="text-sm font-semibold text-brass-200">{SECTION_LABELS[key]}</span>
+                <span className="text-[10px] uppercase tracking-wider text-abyss-700">{key}</span>
+                <div className="ml-auto flex items-center gap-1">
+                  <button onClick={() => move(key, -1)} disabled={order.indexOf(key) === 0} className="rounded p-1 text-abyss-700 hover:text-brass-300 disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
+                  <button onClick={() => move(key, 1)} disabled={order.indexOf(key) === order.length - 1} className="rounded p-1 text-abyss-700 hover:text-brass-300 disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* 各模块强调色 */}
+      <section className="flex flex-col gap-3">
+        <h3 className="label-caps">各模块强调色</h3>
+        <p className="text-[11px] text-abyss-700">单独覆盖某模块的强调色（图标 / 分隔线 / 装饰），未设置跟随主题；区块标题文字仍随主题保持可读。</p>
+        <div className="flex flex-col gap-2">
+          {accentRows.map((row) => {
+            const override = accents[row.key]
+            const current = override ?? themeAccent
+            return (
+              <div key={row.key} className="flex items-center gap-2 rounded-md border border-abyss-800 bg-abyss-900/50 px-2.5 py-2">
+                <span className="w-20 shrink-0 text-sm font-semibold text-brass-200">{row.label}</span>
+                <input
+                  type="color"
+                  value={current}
+                  onChange={(e) => setAccent(row.key, e.target.value)}
+                  className="h-7 w-9 cursor-pointer rounded border border-abyss-700 bg-transparent p-0"
+                  title="选择强调色"
+                />
+                <span className="font-mono text-xs text-abyss-700">{current}</span>
+                {override ? (
+                  <button onClick={() => clearAccent(row.key)} className="ml-auto rounded px-1.5 py-0.5 text-[11px] text-abyss-700 hover:text-brass-300" title="恢复跟随主题">跟随主题</button>
+                ) : (
+                  <span className="ml-auto text-[11px] text-abyss-700">跟随主题</span>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </section>
     </div>
   )

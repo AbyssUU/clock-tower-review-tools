@@ -35,7 +35,7 @@ npm run preview    # 预览生产构建
 
 ### 编辑能力
 - **就地编辑**：预览长图内每个元素均可点击直接修改（标题、说书人、玩家、角色、日志、词条等）。
-- **左侧分栏**：剧本 / 基本信息 / 玩家 / 阶段日志 / 扩展 / 导入导出。
+- **左侧分栏**：剧本 / 基本信息 / 玩家 / 阶段日志 / 扩展 / 布局 / 导入导出，整栏可折叠收起。
 - **统一改名**：角色显示名全局生效，图标仍按原角色名匹配。
 - **提及语法**：日志正文支持 `[座位号]` 与 `（角色名）`，自动渲染为座位徽章 + 玩家名 + 角色图标。
 
@@ -46,7 +46,7 @@ npm run preview    # 预览生产构建
 - **识图载入**：上传复盘截图或粘贴图片链接，经 OpenAI 兼容 vision 接口自动生成复盘 JSON（需自行配置 baseUrl / apiKey / model）。
 
 ### 长图配色主题
-内置 5 套主题（暗夜金 / 深海蓝 / 翡翠夜 / 绯红殿 / 紫晶），覆盖页面背景、昼夜阶段、主题强调、说书人手记等配色；工具栏或「基本信息」中可切换。全部采用「深色底 + 浅色文字」保证可读性。
+内置 7 套主题：5 套深色（暗夜金 / 深海蓝 / 翡翠夜 / 绯红殿 / 紫晶）与 2 套浅色/空白（羊皮纸 / 空白极简），覆盖页面背景、昼夜阶段、主题强调、说书人手记等配色；工具栏或「基本信息」中可切换。另在「布局」标签可单独为标题/魔典/时间线/截图/手记覆盖强调色。
 
 ---
 
@@ -56,7 +56,7 @@ npm run preview    # 预览生产构建
 
 | 字段 | 说明 |
 | --- | --- |
-| `meta` | 标题 / 说书人 / 日期 / 胜负 / MVP / 主题 / 长图宽度 / 标题渲染方式 |
+| `meta` | 标题 / 说书人 / 日期 / 胜负 / MVP / 主题 / 长图宽度 / 标题渲染方式 / 区块顺序 / 各模块强调色 |
 | `scriptMeta` | 剧本基础元数据（名称 / 作者 / 版本 / logo） |
 | `evilSetup` | 恶魔伪装与首夜邪恶互认信息 |
 | `customGlossary` | 自定义高亮词条字典（tag + color + description） |
@@ -84,7 +84,7 @@ npm run preview    # 预览生产构建
 1. **新建 / 编辑**：左侧「基本信息」填标题、说书人、胜负；「玩家」维护座位与角色；「阶段日志」录入各昼夜日志。
 2. **加载剧本**：左侧「剧本」上传剧本 JSON（格式见 `reference/暗藏玄机v2.1.json`），自动带入角色图标、阵营配色与 Reminder Tokens。
 3. **挂载 token**：预览轮盘中悬停玩家 → 点「+」添加其 reminders 或自定义 token。
-4. **调整外观**：工具栏切换配色主题、长图宽度、导出精度；「扩展」调整字体、传奇/奇遇角色、统一改名、说书人手记。
+4. **调整外观**：工具栏切换配色主题、长图宽度、导出精度；「扩展」调整字体、传奇/奇遇角色、统一改名、说书人手记；「布局」调整区块顺序与各模块强调色。
 5. **导出**：
    - 「导出长图 PNG」下载高清长图。
    - 「JSON」导出 / 导入精简复盘数据。
@@ -180,7 +180,7 @@ src/
 ### 关键约定
 
 - **状态**：单一 zustand store，`replay` 为根数据；编辑态由 `EditModeContext` + `useEditable()` 控制（导出/只读时为 false）。
-- **配色**：阵营/角色颜色统一走 `lib/script.ts` 的 `teamColor` / `teamTextColor` / `isEvil` / `displayName`；新增主题在 `lib/theme.ts` 的 `REPLAY_THEMES` 增加一项即可。
+- **配色**：阵营/角色颜色统一走 `lib/script.ts` 的 `teamColor` / `teamTextColor` / `isEvil` / `displayName`；新增主题在 `lib/theme.ts` 的 `REPLAY_THEMES` 增加一项即可（浅色主题需设 `heading` 与 `vignette`）；各模块强调色覆盖走 `useSectionAccent` / `useAccent`，区块标题文字色用 `headingColor`。
 - **跨域图片**：统一入口 `lib/proxy.ts` 的 `proxiedImage()`，代理地址由 `VITE_IMAGE_PROXY_BASE` 决定——未设置走本地 Vite 中间件 `/__img?src=…`（`vite.config.ts`），设置后走 Cloudflare Worker / Vercel Serverless（见「部署到 GitHub Pages」）。
 - **数据标准改动**：需同步更新 `types.ts`、`recognize.ts` 的 `SYSTEM_PROMPT`、`sampleData.ts` 及 `reference/` 示例。
 
@@ -192,3 +192,7 @@ src/
 npx tsc --noEmit   # 类型检查
 npm run build      # 生产构建
 ```
+
+### 更新记录
+v1.3 更新出基础可用版本
+v1.4 新增浅色/空白主题、各模块强调色、区块排序与「布局」标签、左侧栏折叠；手记为空导出不再显示虚线框

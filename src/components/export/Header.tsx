@@ -4,7 +4,7 @@ import { useReplayStore } from '../../store'
 import { useEditable } from '../editable/editMode'
 import { EditableText } from '../editable/Editable'
 import { proxiedImage } from '../../lib/script'
-import { useTheme } from '../../lib/theme'
+import { useAccent, useTheme, isLightTheme, tint } from '../../lib/theme'
 
 const WINNER_META = {
   good: { label: '善良阵营获胜', color: '#4F86C6', bg: 'rgba(79,134,198,0.14)', Icon: Shield },
@@ -15,7 +15,9 @@ const WINNER_META = {
 
 export default function Header({ replay }: { replay: BotCReplayRecord }) {
   const editable = useEditable()
+  const { accent } = useAccent()
   const theme = useTheme()
+  const light = isLightTheme(theme)
   const updateMeta = useReplayStore((s) => s.updateMeta)
   const updateScript = useReplayStore((s) => s.updateScript)
   const { meta, scriptMeta } = replay
@@ -29,14 +31,20 @@ export default function Header({ replay }: { replay: BotCReplayRecord }) {
   const showLogoTitle = hasLogo && titleMode === 'logo'
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-brass-700/50 bg-night-hall">
+    <div
+      className="relative overflow-hidden rounded-2xl border"
+      style={{
+        borderColor: `${accent}55`,
+        background: light ? theme.card.bg : 'linear-gradient(160deg, #0D1117 0%, #161B22 45%, #1B2740 100%)',
+      }}
+    >
       {/* 氛围光 */}
-      <div className="pointer-events-none absolute inset-0 bg-ember-radial" />
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage:
-            'radial-gradient(circle at 20% 120%, rgba(201,162,39,0.14), transparent 50%), radial-gradient(circle at 90% -10%, rgba(74,91,147,0.18), transparent 55%)',
+          background: light
+            ? `radial-gradient(circle at 50% 50%, ${tint(accent, 0.82)}, transparent 62%)`
+            : 'radial-gradient(circle at 50% 50%, rgba(255,150,50,0.18), transparent 60%), radial-gradient(circle at 20% 120%, rgba(201,162,39,0.14), transparent 50%), radial-gradient(circle at 90% -10%, rgba(74,91,147,0.18), transparent 55%)',
         }}
       />
 
@@ -75,8 +83,8 @@ export default function Header({ replay }: { replay: BotCReplayRecord }) {
         ) : (
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full border bg-abyss-900" style={{ borderColor: `${theme.accent}66`, boxShadow: `0 0 14px ${theme.accent}44` }}>
-                <Crown className="h-5 w-5" style={{ color: theme.accent }} />
+              <span className="flex h-11 w-11 items-center justify-center rounded-full border bg-abyss-900" style={{ borderColor: `${accent}66`, boxShadow: `0 0 14px ${accent}44` }}>
+                <Crown className="h-5 w-5" style={{ color: accent }} />
               </span>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
@@ -85,7 +93,7 @@ export default function Header({ replay }: { replay: BotCReplayRecord }) {
                     onChange={(v) => updateMeta({ title: v })}
                     disabled={!editable}
                     className="block font-display text-3xl font-bold leading-tight"
-                    style={{ color: theme.accentSoft }}
+                    style={{ color: theme.card.title }}
                   />
                   {editable && hasLogo && (
                     <button
@@ -102,7 +110,8 @@ export default function Header({ replay }: { replay: BotCReplayRecord }) {
                     value={scriptMeta.scriptName}
                     onChange={(v) => updateScript({ scriptName: v })}
                     disabled={!editable}
-                    className="rounded border border-brass-700/50 bg-abyss-900/60 px-2 py-0.5 font-serif text-brass-300/90"
+                    className="rounded border px-2 py-0.5 font-serif"
+                    style={light ? { borderColor: `${accent}44`, background: 'rgba(0,0,0,0.04)', color: theme.card.title } : { borderColor: 'rgba(150,105,13,0.5)', background: 'rgba(13,17,23,0.6)', color: '#DDBB5F' }}
                   />
                   {scriptMeta.author && (
                     <EditableText
@@ -131,22 +140,22 @@ export default function Header({ replay }: { replay: BotCReplayRecord }) {
         )}
 
         {/* 元信息 */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-brass-700/30 pt-4 text-sm">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t pt-4 text-sm" style={{ borderColor: `${accent}33` }}>
           <div className="flex items-center gap-2">
-            <span className="label-caps">说书人</span>
-            <EditableText value={meta.storyteller} onChange={(v) => updateMeta({ storyteller: v })} disabled={!editable} className="text-brass-100" />
+            <span className="label-caps" style={light ? { color: `${theme.card.text}99` } : undefined}>说书人</span>
+            <EditableText value={meta.storyteller} onChange={(v) => updateMeta({ storyteller: v })} disabled={!editable} className="text-brass-100" style={light ? { color: theme.card.text } : undefined} />
           </div>
           <div className="flex items-center gap-2">
-            <span className="label-caps">日期</span>
-            <EditableText value={meta.date} onChange={(v) => updateMeta({ date: v })} disabled={!editable} className="text-brass-100" />
+            <span className="label-caps" style={light ? { color: `${theme.card.text}99` } : undefined}>日期</span>
+            <EditableText value={meta.date} onChange={(v) => updateMeta({ date: v })} disabled={!editable} className="text-brass-100" style={light ? { color: theme.card.text } : undefined} />
           </div>
           {meta.mvp && meta.mvp.trim() ? (
             <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-brass-400" />
-              <span className="label-caps">MVP</span>
-              <EditableText value={meta.mvp} onChange={(v) => updateMeta({ mvp: v || undefined })} disabled={!editable} className="text-brass-100" />
+              <Star className="h-4 w-4" style={{ color: light ? theme.card.text : undefined }} />
+              <span className="label-caps" style={light ? { color: `${theme.card.text}99` } : undefined}>MVP</span>
+              <EditableText value={meta.mvp} onChange={(v) => updateMeta({ mvp: v || undefined })} disabled={!editable} className="text-brass-100" style={light ? { color: theme.card.text } : undefined} />
               {editable && (
-                <button onClick={() => updateMeta({ mvp: undefined })} className="rounded p-0.5 text-abyss-700 hover:text-evil" title="移除 MVP">
+                <button onClick={() => updateMeta({ mvp: undefined })} className="rounded p-0.5 hover:text-evil" style={{ color: light ? theme.card.text : undefined }} title="移除 MVP">
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
@@ -154,7 +163,8 @@ export default function Header({ replay }: { replay: BotCReplayRecord }) {
           ) : editable ? (
             <button
               onClick={() => updateMeta({ mvp: 'MVP 玩家' })}
-              className="flex items-center gap-1 rounded border border-dashed border-brass-700/50 px-2 py-0.5 text-xs text-abyss-700 hover:text-brass-300"
+              className="flex items-center gap-1 rounded border border-dashed px-2 py-0.5 text-xs hover:text-brass-300"
+              style={light ? { borderColor: `${accent}44`, color: `${theme.card.text}99` } : { borderColor: 'rgba(150,105,13,0.5)', color: '#2B3342' }}
             >
               <Plus className="h-3.5 w-3.5" /> 添加 MVP
             </button>
@@ -163,9 +173,9 @@ export default function Header({ replay }: { replay: BotCReplayRecord }) {
 
         {/* 胜负判定 */}
         {meta.winningReason && (
-          <div className="rounded-lg border border-brass-700/40 bg-abyss-900/50 px-4 py-3">
-            <span className="label-caps mr-2">胜负判定</span>
-            <EditableText value={meta.winningReason} onChange={(v) => updateMeta({ winningReason: v })} disabled={!editable} className="text-sm text-[#c3cde0]" />
+          <div className="rounded-lg border px-4 py-3" style={{ borderColor: `${accent}44`, background: light ? 'rgba(0,0,0,0.03)' : 'rgba(13,17,23,0.5)' }}>
+            <span className="label-caps mr-2" style={light ? { color: `${theme.card.text}99` } : undefined}>胜负判定</span>
+            <EditableText value={meta.winningReason} onChange={(v) => updateMeta({ winningReason: v })} disabled={!editable} className="text-sm" style={{ color: theme.card.text }} />
           </div>
         )}
       </div>

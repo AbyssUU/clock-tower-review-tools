@@ -4,6 +4,7 @@ import type { ReplayPlayer, ScriptCharacter, BoardToken } from '../../types'
 import { characterTeam, CHARACTER_CATALOG } from '../../types'
 import { teamOf, teamColor, teamTextColor, characterImage, isEvil, displayName, characterReminders, type Team } from '../../lib/script'
 import { makeWheelConfig, playerPosition, spokePoint, gearTeethPath, svgDefIds } from '../../lib/geometry'
+import { useTheme, isLightTheme } from '../../lib/theme'
 import { useReplayStore, nextId } from '../../store'
 import { useEditable } from '../editable/editMode'
 import { EditableText, EditableSelect, EditableToggle } from '../editable/Editable'
@@ -31,6 +32,11 @@ function resolveTeam(charMap: Map<string, ScriptCharacter> | undefined, name: st
 
 export default function RadialWheel({ players, alivePlayerSeats, charMap, aliases, size = 1120 }: RadialWheelProps) {
   const editable = useEditable()
+  const theme = useTheme()
+  const light = isLightTheme(theme)
+  // token 前景/文字随主题：深色主题用浅字，浅色主题用深字（theme.card.text 已按主题给出对比正确的前景色）
+  const tokenText = light ? theme.card.text : '#f2f5f9'
+  const tokenTextShadow = light ? 'none' : '0 1px 2px rgba(0,0,0,0.9)'
   const [tokenEditorSeat, setTokenEditorSeat] = useState<number | null>(null)
   const cfg = makeWheelConfig(size)
   const total = players.length
@@ -221,9 +227,9 @@ export default function RadialWheel({ players, alivePlayerSeats, charMap, aliase
                   className="flex h-full w-full flex-col items-center justify-center rounded-full"
                   style={{
                     background: isEvil(team)
-                      ? 'radial-gradient(circle at 50% 30%, #3a1416 0%, #160a0c 100%)'
-                      : 'radial-gradient(circle at 50% 30%, #1a2740 0%, #0a1118 100%)',
-                    boxShadow: `0 0 6px ${col}66, inset 0 0 4px rgba(0,0,0,0.5)`,
+                      ? (light ? 'radial-gradient(circle at 50% 30%, #f3dfdc 0%, #e2c4c0 100%)' : 'radial-gradient(circle at 50% 30%, #3a1416 0%, #160a0c 100%)')
+                      : (light ? 'radial-gradient(circle at 50% 30%, #e4ecf7 0%, #cbd8e8 100%)' : 'radial-gradient(circle at 50% 30%, #1a2740 0%, #0a1118 100%)'),
+                    boxShadow: light ? `0 0 6px ${col}55` : `0 0 6px ${col}66, inset 0 0 4px rgba(0,0,0,0.5)`,
                     border: `1px solid ${col}77`,
                     padding: '2px',
                   }}
@@ -239,7 +245,7 @@ export default function RadialWheel({ players, alivePlayerSeats, charMap, aliase
                   />
                   <span
                     className="mt-0 w-full text-center font-semibold"
-                    style={{ color: '#f2f5f9', fontSize: labelFont, wordBreak: 'break-all', lineHeight: 1.1, textShadow: '0 1px 2px rgba(0,0,0,0.9)' }}
+                    style={{ color: tokenText, fontSize: labelFont, wordBreak: 'break-all', lineHeight: 1.1, textShadow: tokenTextShadow }}
                   >
                     {t.label}
                   </span>
@@ -247,11 +253,16 @@ export default function RadialWheel({ players, alivePlayerSeats, charMap, aliase
               ) : (
                 <div
                   className="flex h-full w-full items-center justify-center rounded-full text-center"
-                  style={{ border: `2px solid ${col}`, background: 'radial-gradient(circle at 50% 35%, rgba(34,46,66,0.95) 0%, rgba(10,16,26,0.96) 100%)', boxShadow: `0 0 6px ${col}55, inset 0 0 6px rgba(0,0,0,0.5)`, padding: '3px' }}
+                  style={{
+                    border: `2px solid ${col}`,
+                    background: light ? 'radial-gradient(circle at 50% 35%, rgba(255,255,255,0.96) 0%, rgba(232,236,242,0.96) 100%)' : 'radial-gradient(circle at 50% 35%, rgba(34,46,66,0.95) 0%, rgba(10,16,26,0.96) 100%)',
+                    boxShadow: light ? `0 0 6px ${col}55` : `0 0 6px ${col}55, inset 0 0 6px rgba(0,0,0,0.5)`,
+                    padding: '3px',
+                  }}
                 >
                   <span
                     className="font-bold"
-                    style={{ color: '#f2f5f9', fontSize: customFont, wordBreak: 'break-all', lineHeight: 1.15, textShadow: '0 1px 2px rgba(0,0,0,0.9)' }}
+                    style={{ color: tokenText, fontSize: customFont, wordBreak: 'break-all', lineHeight: 1.15, textShadow: tokenTextShadow }}
                   >
                     {t.label}
                   </span>
