@@ -31,6 +31,10 @@ export async function exportLongImage(node: HTMLElement, filename: string, pixel
   const dataUrl = await toPng(node, {
     pixelRatio,
     cacheBust: true,
+    // 关键：角色图标经图片代理后 URL 为 `/__img?src=…`，真实地址藏在查询参数里。
+    // html-to-image 内部缓存默认会剥掉查询串作为缓存键，导致不同角色的代理图全部命中同一缓存、图标串图。
+    // 开启 includeQueryParams 让缓存键保留查询参数，确保每个角色图标唯一。
+    includeQueryParams: true,
     backgroundColor: '#0d1117',
     width: node.offsetWidth,
     height: node.offsetHeight,
