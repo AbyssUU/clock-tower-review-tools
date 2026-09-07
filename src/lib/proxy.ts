@@ -8,7 +8,8 @@
 //   - 设置为云端代理地址：走 Cloudflare Worker / Vercel Serverless（见 workers/ 与 api/ 目录），
 //     适用于 GitHub Pages 等纯静态托管环境。
 //     例：VITE_IMAGE_PROXY_BASE=https://your-worker.your-subdomain.workers.dev
-const PROXY_BASE = (import.meta.env.VITE_IMAGE_PROXY_BASE as string | undefined)?.trim() || '/__img'
+const PROXY_BASE = (import.meta.env.VITE_IMAGE_PROXY_BASE as string | undefined)?.trim()
+  || (import.meta.env.MODE === 'electron' ? 'botc-img://image' : '/__img')
 
 /** 是否为本地资源（data/blob/相对路径），是则原样返回，不经过代理 */
 function isLocal(url: string): boolean {

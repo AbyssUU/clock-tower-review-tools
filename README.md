@@ -1,8 +1,8 @@
 # 魔典复盘生成器 · Blood on the Clocktower Grimoire Replay
 
-一款暗黑哥特 / 奇幻风格的《血染钟楼》复盘与魔典工具：将一局对局的数据渲染成一张高清长图，支持所见即所得编辑、轻量 JSON 导入导出、剧本 JSON 加载，以及多模态识图自动生成复盘数据。
+一款**血染钟楼**复盘与魔典工具：将一局对局的数据渲染成一张高清长图，支持所见即所得编辑、轻量 JSON 导入导出、剧本 JSON 加载，以及多模态识图自动生成复盘数据。
 
-参考视觉：Merlin-BotC（<https://www.merlin-botc.com/>）与 Avalon 魔典径向蛛网布局。
+
 
 ---
 
@@ -184,7 +184,6 @@ src/
 - **跨域图片**：统一入口 `lib/proxy.ts` 的 `proxiedImage()`，代理地址由 `VITE_IMAGE_PROXY_BASE` 决定——未设置走本地 Vite 中间件 `/__img?src=…`（`vite.config.ts`），设置后走 Cloudflare Worker / Vercel Serverless（见「部署到 GitHub Pages」）。
 - **数据标准改动**：需同步更新 `types.ts`、`recognize.ts` 的 `SYSTEM_PROMPT`、`sampleData.ts` 及 `reference/` 示例。
 
-更完整的架构说明与近期改动记录见 [`CLAUDE.md`](CLAUDE.md)。
 
 ### 提交前检查
 
@@ -195,5 +194,7 @@ npm run build      # 生产构建
 
 ### 更新记录
 v1.3 更新出基础可用版本
+
 v1.4 新增浅色/空白主题、各模块强调色、区块排序与「布局」标签、左侧栏折叠；手记为空导出不再显示虚线框
+
 v1.5 修复了导出图片逻辑错误

@@ -52,11 +52,16 @@ function imageProxy(): Plugin {
   }
 }
 
-export default defineConfig({
-  base: '/clock-tower-review-tools/',
-  plugins: [react(), imageProxy()],
-  server: {
-    port: 5173,
-    host: true,
-  },
+export default defineConfig(({ mode }) => {
+  // Electron 桌面构建用相对 base，使打包后可通过 file:// 直接加载资源；
+  // 网页构建保持 GitHub Pages 的绝对 base。
+  const isElectron = mode === 'electron'
+  return {
+    base: isElectron ? './' : '/clock-tower-review-tools/',
+    plugins: [react(), imageProxy()],
+    server: {
+      port: 5173,
+      host: true,
+    },
+  }
 })

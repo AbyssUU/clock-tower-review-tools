@@ -1,5 +1,6 @@
 node_modules
 dist
+release
 .DS_Store
 *.local
 
@@ -7,4 +8,12 @@ dist
 .env
 .env.*
 !.env.example
-reference/image.png
+reference/
+.claude/
+prompt.md
+CLAUDE.md
+dist/
+electron/
+node_modules/
+release/
+
