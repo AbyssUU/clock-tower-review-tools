@@ -116,7 +116,7 @@ export interface BotCReplayRecord {
     mvp?: string
     titleMode?: 'logo' | 'text' // 标题渲染方式：logo 或文字
     imageWidth?: number // 长图宽度（px），默认 1080
-    theme?: string // 长图配色主题 id（见 src/lib/theme.ts），默认 midnight-gold
+    theme?: string // 长图配色主题 id（见 src/lib/theme.ts），默认 parchment（浅色羊皮纸）
     sectionOrder?: ReorderableSection[] // 长图主体区块显示顺序（默认：截图 → 魔典 → 时间线 → 手记）
     sectionAccents?: Partial<Record<SectionKey, string>> // 各模块强调色覆盖（hex），未设置跟随主题
   }

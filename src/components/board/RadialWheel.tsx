@@ -37,6 +37,9 @@ export default function RadialWheel({ players, alivePlayerSeats, charMap, aliase
   // token 前景/文字随主题：深色主题用浅字，浅色主题用深字（theme.card.text 已按主题给出对比正确的前景色）
   const tokenText = light ? theme.card.text : '#f2f5f9'
   const tokenTextShadow = light ? 'none' : '0 1px 2px rgba(0,0,0,0.9)'
+  // 中央黄铜齿轮盘与玩家昵称模块随主题适配（浅色主题用浅色底 + 深色文字）
+  const centerDisk = light ? 'rgba(255,250,240,0.92)' : 'rgba(13,17,23,0.85)'
+  const centerInner = light ? 'rgba(138,106,26,0.07)' : 'rgba(212,175,55,0.06)'
   const [tokenEditorSeat, setTokenEditorSeat] = useState<number | null>(null)
   const cfg = makeWheelConfig(size)
   const total = players.length
@@ -164,9 +167,9 @@ export default function RadialWheel({ players, alivePlayerSeats, charMap, aliase
 
         {/* 中央黄铜齿轮（不标记存活人数；随轮盘尺寸等比缩放，内部小圆盘更小） */}
         <g>
-          <circle cx={cfg.center} cy={cfg.center} r={118 * s} fill="rgba(13,17,23,0.85)" stroke={`url(#${svgDefIds.gearGrad})`} strokeWidth={3 * s} />
+          <circle cx={cfg.center} cy={cfg.center} r={118 * s} fill={centerDisk} stroke={`url(#${svgDefIds.gearGrad})`} strokeWidth={3 * s} />
           <circle cx={cfg.center} cy={cfg.center} r={96 * s} fill="none" stroke="rgba(201,162,39,0.4)" strokeWidth={1.5 * s} />
-          <circle cx={cfg.center} cy={cfg.center} r={54 * s} fill="rgba(212,175,55,0.06)" stroke="rgba(201,162,39,0.5)" strokeWidth={2 * s} />
+          <circle cx={cfg.center} cy={cfg.center} r={54 * s} fill={centerInner} stroke="rgba(201,162,39,0.5)" strokeWidth={2 * s} />
           {Array.from({ length: 16 }).map((_, i) => {
             const a = (i / 16) * Math.PI * 2
             return (
@@ -365,10 +368,10 @@ export default function RadialWheel({ players, alivePlayerSeats, charMap, aliase
                 disabled={!editable}
                 className="rounded-full px-2.5 py-1 text-[14px] font-bold leading-none"
                 style={{
-                  color: dead ? '#9aa3b2' : '#e6edf3',
-                  background: 'rgba(13,17,23,0.88)',
+                  color: dead ? (light ? '#8a8f98' : '#9aa3b2') : (light ? '#4a3d22' : '#e6edf3'),
+                  background: light ? 'rgba(255,250,240,0.92)' : 'rgba(13,17,23,0.88)',
                   border: `1px solid ${col}66`,
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                  boxShadow: light ? '0 1px 4px rgba(0,0,0,0.20)' : '0 1px 4px rgba(0,0,0,0.5)',
                 }}
               />
             </div>
@@ -385,7 +388,7 @@ export default function RadialWheel({ players, alivePlayerSeats, charMap, aliase
           <div className="absolute inset-0 z-50 flex items-center justify-center" onClick={() => setTokenEditorSeat(null)}>
             <div className="absolute inset-0 bg-black/45" />
             <div
-              className="relative z-10 max-h-[480px] w-[430px] overflow-auto rounded-xl border border-brass-600/60 bg-abyss-900 p-4 shadow-2xl"
+              className="dark relative z-10 max-h-[480px] w-[430px] overflow-auto rounded-xl border border-brass-600/60 bg-abyss-900 p-4 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <TokenAdder

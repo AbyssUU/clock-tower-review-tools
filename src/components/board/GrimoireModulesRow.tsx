@@ -11,6 +11,7 @@ import {
 } from '../../lib/special'
 import { useReplayStore, nextId } from '../../store'
 import { useEditable } from '../editable/editMode'
+import { useTheme, isLightTheme } from '../../lib/theme'
 import { EditableText } from '../editable/Editable'
 import CharacterIcon from './CharacterIcon'
 
@@ -97,16 +98,18 @@ function ModuleCard({
   children: ReactNode
 }) {
   const editable = useEditable()
+  const theme = useTheme()
+  const light = isLightTheme(theme)
   return (
     <div
       className="relative h-full overflow-hidden rounded-xl border"
-      style={{ borderColor: `${color}44`, background: 'rgba(13,17,23,0.6)' }}
+      style={{ borderColor: light ? `${color}66` : `${color}44`, background: theme.card.bg }}
     >
       <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 10%, ${color}22, transparent 45%)` }} />
       <div className="relative z-10 flex h-full flex-col gap-3 p-3.5">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 shrink-0" style={{ color }} />
-          <span className="font-display text-sm font-bold tracking-[0.12em]" style={{ color: '#EBD28A' }}>
+          <span className="font-display text-sm font-bold tracking-[0.12em]" style={{ color: theme.card.title }}>
             {title}
           </span>
           {sub && <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: `${color}cc` }}>{sub}</span>}
@@ -139,6 +142,8 @@ function BluffsModule({
   onRemove: () => void
 }) {
   const editable = useEditable()
+  const theme = useTheme()
+  const light = isLightTheme(theme)
   const bluffs = evilSetup.demonBluffs ?? []
   const setBluff = (index: number, name: string) => {
     const next = [...bluffs]
@@ -166,7 +171,8 @@ function BluffsModule({
                 displayValue={displayName(b, aliases)}
                 onChange={(v) => setBluff(i, v)}
                 disabled={!editable}
-                className="w-full truncate text-center text-xs font-semibold text-white"
+                className="w-full truncate text-center text-xs font-semibold"
+                style={{ color: theme.card.text }}
               />
               {editable && (
                 <button
@@ -195,21 +201,22 @@ function BluffsModule({
 
       {/* 互认补充（三并排下方） */}
       {evilSetup.lunaticBluffs && evilSetup.lunaticBluffs.length > 0 && (
-        <div className="flex items-center gap-1.5 text-xs text-white/90">
+        <div className="flex items-center gap-1.5 text-xs" style={{ color: theme.card.text }}>
           <Sparkles className="h-3 w-3 shrink-0 text-brass-500" />
-          <span className="font-semibold text-brass-200">狂人所见：</span>
+          <span className="font-semibold" style={{ color: theme.card.title }}>狂人所见：</span>
           <span className="truncate">{evilSetup.lunaticBluffs.map((n) => displayName(n, aliases)).join('、')}</span>
         </div>
       )}
 
       {evilSetup.evilKnowledgeNotes && (
-        <div className="flex items-start gap-1.5 rounded-md border px-2.5 py-1.5" style={{ borderColor: 'rgba(201,162,39,0.2)', background: 'rgba(13,17,23,0.5)' }}>
+        <div className="flex items-start gap-1.5 rounded-md border px-2.5 py-1.5" style={{ borderColor: light ? 'rgba(0,0,0,0.10)' : 'rgba(201,162,39,0.2)', background: light ? 'rgba(0,0,0,0.03)' : 'rgba(13,17,23,0.5)' }}>
           <Eye className="mt-0.5 h-3 w-3 shrink-0 text-brass-500" />
           <EditableText
             value={evilSetup.evilKnowledgeNotes}
             onChange={(v) => useReplayStore.getState().updateEvilSetup({ evilKnowledgeNotes: v })}
             disabled={!editable}
-            className="text-xs leading-relaxed text-white/90"
+            className="text-xs leading-relaxed"
+            style={{ color: theme.card.text }}
           />
         </div>
       )}
@@ -228,6 +235,7 @@ function SpecialModule({
   onRemove: () => void
 }) {
   const editable = useEditable()
+  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const col = specialColor(category)
   const roles = useReplayStore((s) => s.replay.specialRoles) ?? []
@@ -265,9 +273,9 @@ function SpecialModule({
                 onChange={(v) => rename(r.id, v)}
                 disabled={!editable}
                 className="w-full truncate text-center text-xs font-semibold"
-                style={{ color: '#c3cde0' }}
+                style={{ color: theme.card.text }}
               />
-              {r.nameEn && <span className="truncate text-center text-[10px] uppercase tracking-wide text-abyss-700">{r.nameEn}</span>}
+              {r.nameEn && <span className="truncate text-center text-[10px] uppercase tracking-wide" style={{ color: theme.card.text, opacity: 0.7 }}>{r.nameEn}</span>}
               {editable && (
                 <button
                   onClick={() => remove(r.id)}

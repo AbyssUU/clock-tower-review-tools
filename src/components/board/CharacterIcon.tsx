@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ScriptCharacter } from '../../types'
-import { teamColor, teamTextColor, isEvil, type Team } from '../../lib/script'
+import { teamColor, teamTextColor, type Team } from '../../lib/script'
 
 interface CharacterIconProps {
   name?: string
@@ -24,7 +24,7 @@ export default function CharacterIcon({ name, image, team, size, dead, ringColor
   const radius = shape === 'square' ? Math.round(size * 0.16) : '9999px'
   // 光晕 / 内阴影按尺寸等比缩放，避免小图标（时间线）被阴影盖满导致图像看不清
   const glow = Math.max(Math.round(size * 0.12), 2)
-  const inset = Math.max(Math.round(size * 0.1), 1)
+  const bevel = Math.max(1, Math.round(size * 0.02)) // 上缘高光厚度，营造 token 立体质感
 
   return (
     <div
@@ -33,11 +33,11 @@ export default function CharacterIcon({ name, image, team, size, dead, ringColor
         width: size,
         height: size,
         borderRadius: radius,
-        background: isEvil(team)
-          ? 'radial-gradient(circle at 50% 35%, #3a1416 0%, #160a0c 100%)'
-          : 'radial-gradient(circle at 50% 35%, #1a2740 0%, #0a1118 100%)',
+        background:
+          // 参照 townsquare 的中性暗色「徽章/皮面」底，与阵营无关；阵营色仅由外环与光晕表达
+          'radial-gradient(circle at 50% 30%, #3b332a 0%, #251f18 55%, #131009 100%)',
         border: bordered ? `${borderWidth}px solid ${col}` : 'none',
-        boxShadow: bordered ? `0 0 ${glow}px ${isEvil(team) ? 'rgba(192,57,43,0.45)' : 'rgba(79,134,198,0.35)'}, inset 0 0 ${inset}px rgba(0,0,0,0.5)` : 'none',
+        boxShadow: bordered ? `0 0 ${glow}px ${col}55` : 'none',
         opacity: dead ? 0.55 : 1,
       }}
     >
@@ -59,6 +59,15 @@ export default function CharacterIcon({ name, image, team, size, dead, ringColor
           {name?.slice(0, 1) ?? '?'}
         </span>
       )}
+
+      {/* 立体质感：上缘高光 + 下缘暗影 + 细内描边，叠在肖像之上（参照 townsquare token 美术） */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          borderRadius: radius,
+          boxShadow: `inset 0 ${bevel}px ${bevel * 2}px rgba(255,255,255,0.22), inset 0 -${bevel}px ${bevel * 2}px rgba(0,0,0,0.42), inset 0 0 0 ${Math.max(1, Math.round(size * 0.01))}px rgba(0,0,0,0.16)`,
+        }}
+      />
     </div>
   )
 }

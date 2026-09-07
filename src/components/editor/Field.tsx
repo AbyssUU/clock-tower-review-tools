@@ -9,9 +9,9 @@ interface FieldProps {
 export function Field({ label, children, hint }: FieldProps) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold text-abyss-700">{label}</span>
+      <span className="text-xs font-semibold text-stone-500 dark:text-abyss-700">{label}</span>
       {children}
-      {hint && <span className="text-[11px] text-abyss-700/70">{hint}</span>}
+      {hint && <span className="text-[11px] text-stone-500/80 dark:text-abyss-700/70">{hint}</span>}
     </label>
   )
 }

@@ -4,10 +4,13 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
     /* 字体变量：中文默认宋体，英文/数字默认 Times New Roman（长图内联覆盖可单独调整） */
     --font-cn: 'Songti SC', 'STSong', 'SimSun', serif;
     --font-latin: 'Times New Roman', 'Times', serif;
+  }
+  .dark {
+    color-scheme: dark;
   }
 
   html,
@@ -18,11 +21,15 @@
 
   body {
     margin: 0;
-    background: #0d1117;
-    color: #e6edf3;
+    background: #f4f0e6;
+    color: #2b2620;
     font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  html.dark body {
+    background: #0d1117;
+    color: #e6edf3;
   }
 
   ::selection {
@@ -37,11 +44,18 @@
     background: transparent;
   }
   *::-webkit-scrollbar-thumb {
-    background: #2b3342;
+    background: #cbc2ac;
     border-radius: 6px;
-    border: 2px solid #0d1117;
+    border: 2px solid #f4f0e6;
   }
   *::-webkit-scrollbar-thumb:hover {
+    background: #b2a98f;
+  }
+  html.dark *::-webkit-scrollbar-thumb {
+    background: #2b3342;
+    border: 2px solid #0d1117;
+  }
+  html.dark *::-webkit-scrollbar-thumb:hover {
     background: #3a4354;
   }
 }
@@ -64,15 +78,20 @@
     pointer-events: none;
   }
 
+  /* 长图内部的小标签（Header / Token 弹层等）：固定黄铜色，适配深色背景 */
   .label-caps {
     @apply text-[10px] font-semibold uppercase tracking-[0.18em] text-brass-300/80;
   }
+  /* 左侧编辑栏（UI 界面）的小标签：随界面深/浅主题切换 */
+  .label-caps-ui {
+    @apply text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-600/80 dark:text-brass-300/80;
+  }
 
   .input-dark {
-    @apply w-full rounded-md border border-abyss-700 bg-abyss-950/70 px-3 py-2 text-sm text-[#e6edf3] placeholder-abyss-700 outline-none transition;
+    @apply w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 placeholder-stone-400 outline-none transition dark:border-abyss-700 dark:bg-abyss-950/70 dark:text-[#e6edf3] dark:placeholder-abyss-700;
   }
   .input-dark:focus {
-    @apply border-brass-500/60;
+    @apply border-amber-500/70 dark:border-brass-500/60;
     box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
   }
 

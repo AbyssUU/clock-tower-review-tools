@@ -27,7 +27,7 @@ import { useReplayStore, nextId } from '../../store'
 import type { ReplayPlayer, GamePhase, LogEntry, SectionKey, ReorderableSection } from '../../types'
 import { CHARACTER_CATALOG, BODY_SECTIONS, SECTION_LABELS } from '../../types'
 import { buildCharacterMap, characterImage, teamColor } from '../../lib/script'
-import { REPLAY_THEMES, DEFAULT_SECTION_ORDER, getTheme } from '../../lib/theme'
+import { REPLAY_THEMES, DEFAULT_THEME_ID, DEFAULT_SECTION_ORDER, getTheme } from '../../lib/theme'
 import { FABLED_CATALOG, TRAVELER_CATALOG } from '../../lib/special'
 import { downloadJSON } from '../../lib/exportUtils'
 import { recognizeReplayImage, extractJSON, type VisionConfig } from '../../lib/recognize'
@@ -52,7 +52,7 @@ export default function EditorPanel() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* 标签栏 */}
-      <div className="flex shrink-0 flex-wrap gap-1 border-b border-abyss-800 bg-abyss-900/60 px-2 pt-2">
+      <div className="flex shrink-0 flex-wrap gap-1 border-b border-stone-300 dark:border-abyss-800 bg-white/75 dark:bg-abyss-900/60 px-2 pt-2">
         {TABS.map((t) => {
           const Icon = t.icon
           const active = tab === t.key
@@ -62,8 +62,8 @@ export default function EditorPanel() {
               onClick={() => setTab(t.key)}
               className={`flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-sm font-medium transition ${
                 active
-                  ? 'bg-abyss-950 text-brass-300 shadow-brass-inner'
-                  : 'text-abyss-700 hover:bg-abyss-850 hover:text-brass-200'
+                  ? 'bg-stone-100 dark:bg-abyss-950 text-stone-600 dark:text-brass-300 shadow-brass-inner'
+                  : 'text-stone-500 dark:text-abyss-700 hover:bg-stone-200 dark:hover:bg-abyss-850 hover:text-amber-700 dark:hover:text-brass-200'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -108,39 +108,39 @@ function ScriptTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="label-caps">剧本 JSON</h3>
-        <button onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-md border border-brass-600/60 bg-brass-500/10 px-3 py-2 text-sm font-semibold text-brass-200 hover:bg-brass-500/20">
+        <h3 className="label-caps-ui">剧本 JSON</h3>
+        <button onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 rounded-md border border-amber-600/50 dark:border-brass-600/60 bg-amber-500/15 dark:bg-brass-500/10 px-3 py-2 text-sm font-semibold text-stone-700 dark:text-brass-200 hover:bg-amber-500/30 dark:hover:bg-brass-500/20">
           <Upload className="h-4 w-4" /> 上传剧本 JSON
         </button>
         <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
       </div>
 
-      {msg && <p className="text-sm text-brass-200">{msg}</p>}
+      {msg && <p className="text-sm text-stone-700 dark:text-brass-200">{msg}</p>}
 
       {script.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-abyss-700 p-6 text-center text-sm text-abyss-700">
-          尚未加载剧本。请上传剧本 JSON（参考 <span className="font-mono text-brass-300">暗藏玄机v2.1.json</span>），
+        <div className="rounded-lg border border-dashed border-stone-300 dark:border-abyss-700 p-6 text-center text-sm text-stone-500 dark:text-abyss-700">
+          尚未加载剧本。请上传剧本 JSON（参考 <span className="font-mono text-stone-600 dark:text-brass-300">暗藏玄机v2.1.json</span>），
           加载后魔典将显示对应角色图标、阵营配色与 Reminder Tokens。
         </div>
       ) : (
         <>
-          <div className="flex items-center gap-2 text-sm text-abyss-700">
-            <span className="font-semibold text-brass-200">{scriptName || '剧本'}</span>
+          <div className="flex items-center gap-2 text-sm text-stone-500 dark:text-abyss-700">
+            <span className="font-semibold text-stone-700 dark:text-brass-200">{scriptName || '剧本'}</span>
             <span>· {script.length} 个角色</span>
           </div>
           <div className="flex flex-col gap-1.5">
             {script.map((c) => (
-              <div key={c.id} className="flex items-center gap-2.5 rounded-md border border-abyss-800 bg-abyss-900/50 px-2.5 py-1.5">
+              <div key={c.id} className="flex items-center gap-2.5 rounded-md border border-stone-300 dark:border-abyss-800 bg-white/60 dark:bg-abyss-900/50 px-2.5 py-1.5">
                 <CharacterIcon name={c.name} image={characterImage(charMap, c.name)} team={c.team} size={34} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold" style={{ color: teamColor(c.team) }}>{c.name}</span>
-                    <span className="text-[10px] uppercase tracking-wider text-abyss-700">{c.team}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-stone-500 dark:text-abyss-700">{c.team}</span>
                   </div>
-                  {c.ability && <p className="truncate text-xs text-abyss-700" title={c.ability}>{c.ability}</p>}
+                  {c.ability && <p className="truncate text-xs text-stone-500 dark:text-abyss-700" title={c.ability}>{c.ability}</p>}
                 </div>
                 {(c.reminders.length > 0 || c.remindersGlobal.length > 0) && (
-                  <span className="shrink-0 text-[10px] text-brass-300/70">
+                  <span className="shrink-0 text-[10px] text-stone-600/80 dark:text-brass-300/70">
                     {[...c.reminders, ...c.remindersGlobal].slice(0, 4).join(' / ')}
                   </span>
                 )}
@@ -163,7 +163,7 @@ function MetaTab() {
   return (
     <div className="flex flex-col gap-5">
       <section className="flex flex-col gap-3">
-        <h3 className="label-caps">对局信息</h3>
+        <h3 className="label-caps-ui">对局信息</h3>
         <Field label="复盘标题">
           <TextInput value={replay.meta.title} onChange={(e) => updateMeta({ title: e.target.value })} />
         </Field>
@@ -205,7 +205,7 @@ function MetaTab() {
               step={20}
               value={replay.meta.imageWidth ?? 1080}
               onChange={(e) => updateMeta({ imageWidth: Number(e.target.value) })}
-              className="flex-1 accent-brass-500"
+              className="flex-1 accent-amber-600 dark:accent-brass-500"
             />
             <TextInput
               type="number"
@@ -215,8 +215,8 @@ function MetaTab() {
             />
           </div>
         </Field>
-        <Field label="长图配色主题" hint="切换页面背景与氛围光晕，均为深色底 + 浅色文字以保证可读性">
-          <Select value={replay.meta.theme ?? REPLAY_THEMES[0].id} onChange={(e) => updateMeta({ theme: e.target.value })}>
+        <Field label="长图配色主题" hint="切换页面背景与氛围光晕；默认浅色羊皮纸，另有多种深色主题可选">
+          <Select value={replay.meta.theme ?? DEFAULT_THEME_ID} onChange={(e) => updateMeta({ theme: e.target.value })}>
             {REPLAY_THEMES.map((t) => (
               <option key={t.id} value={t.id}>{t.label}</option>
             ))}
@@ -225,7 +225,7 @@ function MetaTab() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="label-caps">剧本信息</h3>
+        <h3 className="label-caps-ui">剧本信息</h3>
         <div className="grid grid-cols-2 gap-3">
           <Field label="剧本名称">
             <TextInput value={replay.scriptMeta.scriptName} onChange={(e) => updateScript({ scriptName: e.target.value })} />
@@ -243,7 +243,7 @@ function MetaTab() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h3 className="label-caps">恶魔伪装与邪恶初始</h3>
+        <h3 className="label-caps-ui">恶魔伪装与邪恶初始</h3>
         <Field label="三个恶魔伪装角色（用顿号或逗号分隔）" hint="如：洗衣妇、厨师、处女">
           <TextInput
             value={replay.evilSetup.demonBluffs.join('、')}
@@ -302,14 +302,14 @@ function PlayersTab() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="label-caps">玩家与座位（{players.length} 人）</h3>
-        <button onClick={addPlayer} className="flex items-center gap-1 rounded-md border border-brass-700/50 px-2.5 py-1.5 text-xs font-semibold text-brass-300 hover:bg-brass-500/10">
+        <h3 className="label-caps-ui">玩家与座位（{players.length} 人）</h3>
+        <button onClick={addPlayer} className="flex items-center gap-1 rounded-md border border-amber-700/40 dark:border-brass-700/50 px-2.5 py-1.5 text-xs font-semibold text-stone-600 dark:text-brass-300 hover:bg-amber-500/20 dark:hover:bg-brass-500/10">
           <Plus className="h-3.5 w-3.5" /> 添加玩家
         </button>
       </div>
 
       {players.map((p) => (
-        <div key={p.seatNumber} className="flex flex-wrap items-end gap-2 rounded-lg border border-abyss-800 bg-abyss-900/50 p-3">
+        <div key={p.seatNumber} className="flex flex-wrap items-end gap-2 rounded-lg border border-stone-300 dark:border-abyss-800 bg-white/60 dark:bg-abyss-900/50 p-3">
           <div className="w-14">
             <Field label="座位">
               <TextInput
@@ -347,7 +347,7 @@ function PlayersTab() {
           </div>
           <button
             onClick={() => removePlayer(p.seatNumber)}
-            className="ml-auto rounded-md p-2 text-abyss-700 hover:bg-evil/10 hover:text-evil"
+            className="ml-auto rounded-md p-2 text-stone-500 dark:text-abyss-700 hover:bg-evil/10 hover:text-evil"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -431,19 +431,19 @@ function PhasesTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="label-caps">昼夜复盘流（{phases.length} 阶段）</h3>
-        <button onClick={addPhase} className="flex items-center gap-1 rounded-md border border-brass-700/50 px-2.5 py-1.5 text-xs font-semibold text-brass-300 hover:bg-brass-500/10">
+        <h3 className="label-caps-ui">昼夜复盘流（{phases.length} 阶段）</h3>
+        <button onClick={addPhase} className="flex items-center gap-1 rounded-md border border-amber-700/40 dark:border-brass-700/50 px-2.5 py-1.5 text-xs font-semibold text-stone-600 dark:text-brass-300 hover:bg-amber-500/20 dark:hover:bg-brass-500/10">
           <Plus className="h-3.5 w-3.5" /> 添加阶段
         </button>
       </div>
 
       {phases.map((ph) => (
-        <div key={ph.id} className="rounded-lg border border-abyss-800 bg-abyss-900/50">
-          <div className="flex flex-wrap items-center gap-2 border-b border-abyss-800 p-3">
+        <div key={ph.id} className="rounded-lg border border-stone-300 dark:border-abyss-800 bg-white/60 dark:bg-abyss-900/50">
+          <div className="flex flex-wrap items-center gap-2 border-b border-stone-300 dark:border-abyss-800 p-3">
             <button
               onClick={() => updatePhase(ph.id, { phaseType: ph.phaseType === 'night' ? 'day' : 'night' })}
               className={`flex h-7 w-7 items-center justify-center rounded-md border ${
-                ph.phaseType === 'night' ? 'border-moon-600 bg-moon-800 text-moon-300' : 'border-brass-600 bg-brass-500/10 text-brass-300'
+                ph.phaseType === 'night' ? 'border-moon-600 bg-moon-800 text-moon-300' : 'border-amber-600 dark:border-brass-600 bg-amber-500/15 dark:bg-brass-500/10 text-stone-600 dark:text-brass-300'
               }`}
               title="切换昼夜"
             >
@@ -452,16 +452,16 @@ function PhasesTab() {
             <Field label="阶段名">
               <TextInput className="w-56" value={ph.title} onChange={(e) => updatePhase(ph.id, { title: e.target.value })} />
             </Field>
-            <button onClick={() => addLog(ph.id)} className="ml-auto flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold text-brass-300 hover:bg-brass-500/10">
+            <button onClick={() => addLog(ph.id)} className="ml-auto flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold text-stone-600 dark:text-brass-300 hover:bg-amber-500/20 dark:hover:bg-brass-500/10">
               <Plus className="h-3.5 w-3.5" /> 日志
             </button>
-            <button onClick={() => removePhase(ph.id)} className="rounded-md p-1.5 text-abyss-700 hover:bg-evil/10 hover:text-evil">
+            <button onClick={() => removePhase(ph.id)} className="rounded-md p-1.5 text-stone-500 dark:text-abyss-700 hover:bg-evil/10 hover:text-evil">
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
 
           <div className="flex flex-col gap-2 p-3">
-            {ph.logs.length === 0 && <p className="py-2 text-center text-xs text-abyss-700">暂无日志</p>}
+            {ph.logs.length === 0 && <p className="py-2 text-center text-xs text-stone-500 dark:text-abyss-700">暂无日志</p>}
             {ph.logs.map((log) => {
               const isDragging = dragged?.logId === log.id
               return (
@@ -476,7 +476,7 @@ function PhasesTab() {
                   }
                   setDragged(null)
                 }}
-                className={`flex flex-col gap-2 rounded border p-2 transition ${isDragging ? 'border-brass-500/60 bg-brass-500/5 opacity-50' : 'border-abyss-800 bg-abyss-950/50'}`}
+                className={`flex flex-col gap-2 rounded border p-2 transition ${isDragging ? 'border-amber-500/60 dark:border-brass-500/60 bg-amber-500/10 dark:bg-brass-500/5 opacity-50' : 'border-stone-300 dark:border-abyss-800 bg-stone-100/70 dark:bg-abyss-950/50'}`}
               >
                 {/* 第一行：类型 + 投票 + 标签（与时间线单行顺序一致；统一「标签在上、输入在下」并在同一水平线对齐） */}
                 <div className="flex flex-wrap items-end gap-2">
@@ -484,7 +484,7 @@ function PhasesTab() {
                     draggable
                     onDragStart={(e) => { setDragged({ phaseId: ph.id, logId: log.id }); e.dataTransfer.effectAllowed = 'move' }}
                     onDragEnd={() => setDragged(null)}
-                    className="mb-1.5 cursor-grab text-abyss-700 hover:text-brass-300"
+                    className="mb-1.5 cursor-grab text-stone-500 dark:text-abyss-700 hover:text-amber-700 dark:hover:text-brass-300"
                     title="拖动排序"
                   >
                     <GripVertical className="h-4 w-4" />
@@ -533,7 +533,7 @@ function PhasesTab() {
                       />
                     </Field>
                   )}
-                  <button onClick={() => removeLog(ph.id, log.id)} className="ml-auto rounded p-1 text-abyss-700 hover:bg-evil/10 hover:text-evil">
+                  <button onClick={() => removeLog(ph.id, log.id)} className="ml-auto rounded p-1 text-stone-500 dark:text-abyss-700 hover:bg-evil/10 hover:text-evil">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -604,8 +604,8 @@ function ExtrasTab() {
     <div className="flex flex-col gap-6">
       {/* 字体设置 */}
       <section className="flex flex-col gap-3">
-        <h3 className="label-caps">字体设置</h3>
-        <p className="text-[11px] text-abyss-700">中文默认宋体，英文/数字默认 Times New Roman；可分别调整。</p>
+        <h3 className="label-caps-ui">字体设置</h3>
+        <p className="text-[11px] text-stone-500 dark:text-abyss-700">中文默认宋体，英文/数字默认 Times New Roman；可分别调整。</p>
         <Field label="中文字体">
           <Select
             value={replay.fontSettings?.cn ?? ''}
@@ -638,22 +638,22 @@ function ExtrasTab() {
 
       {/* 传奇 / 奇遇角色 */}
       <section className="flex flex-col gap-3">
-        <h3 className="label-caps">传奇角色（Fabled）</h3>
+        <h3 className="label-caps-ui">传奇角色（Fabled）</h3>
         {roles.filter((r) => r.category === 'fabled').map((r) => (
           <div key={r.id} className="flex items-center gap-2">
             <TextInput value={r.name} onChange={(e) => renameRole(r.id, e.target.value)} className="flex-1" />
-            <span className="text-[10px] text-abyss-700">{r.nameEn}</span>
-            <button onClick={() => removeRole(r.id)} className="rounded p-1.5 text-abyss-700 hover:bg-evil/10 hover:text-evil"><Trash2 className="h-3.5 w-3.5" /></button>
+            <span className="text-[10px] text-stone-500 dark:text-abyss-700">{r.nameEn}</span>
+            <button onClick={() => removeRole(r.id)} className="rounded p-1.5 text-stone-500 dark:text-abyss-700 hover:bg-evil/10 hover:text-evil"><Trash2 className="h-3.5 w-3.5" /></button>
           </div>
         ))}
         <AddRoleSelect category="fabled" added={roles.filter((r) => r.category === 'fabled').map((r) => r.nameEn ?? r.name)} onAdd={addRole} />
 
-        <h3 className="label-caps mt-2">奇遇角色（Traveler）</h3>
+        <h3 className="label-caps-ui mt-2">奇遇角色（Traveler）</h3>
         {roles.filter((r) => r.category === 'traveler').map((r) => (
           <div key={r.id} className="flex items-center gap-2">
             <TextInput value={r.name} onChange={(e) => renameRole(r.id, e.target.value)} className="flex-1" />
-            <span className="text-[10px] text-abyss-700">{r.nameEn}</span>
-            <button onClick={() => removeRole(r.id)} className="rounded p-1.5 text-abyss-700 hover:bg-evil/10 hover:text-evil"><Trash2 className="h-3.5 w-3.5" /></button>
+            <span className="text-[10px] text-stone-500 dark:text-abyss-700">{r.nameEn}</span>
+            <button onClick={() => removeRole(r.id)} className="rounded p-1.5 text-stone-500 dark:text-abyss-700 hover:bg-evil/10 hover:text-evil"><Trash2 className="h-3.5 w-3.5" /></button>
           </div>
         ))}
         <AddRoleSelect category="traveler" added={roles.filter((r) => r.category === 'traveler').map((r) => r.nameEn ?? r.name)} onAdd={addRole} />
@@ -661,13 +661,13 @@ function ExtrasTab() {
 
       {/* 统一改名 */}
       <section className="flex flex-col gap-3">
-        <h3 className="label-caps">角色统一改名（显示名，全局生效）</h3>
-        <p className="text-[11px] text-abyss-700">修改显示名后，时间线、魔典、伪装架中的该角色名将统一更新；图标仍按原角色名匹配。</p>
-        {names.length === 0 && <p className="text-xs text-abyss-700">暂无角色</p>}
+        <h3 className="label-caps-ui">角色统一改名（显示名，全局生效）</h3>
+        <p className="text-[11px] text-stone-500 dark:text-abyss-700">修改显示名后，时间线、魔典、伪装架中的该角色名将统一更新；图标仍按原角色名匹配。</p>
+        {names.length === 0 && <p className="text-xs text-stone-500 dark:text-abyss-700">暂无角色</p>}
         {names.map((name) => (
           <div key={name} className="flex items-center gap-2">
             <span className="w-24 shrink-0 truncate text-xs font-semibold" style={{ color: teamColor(script.find((c) => c.name === name)?.team ?? 'unknown') }} title={name}>{name}</span>
-            <span className="text-abyss-700">→</span>
+            <span className="text-stone-500 dark:text-abyss-700">→</span>
             <TextInput
               value={aliases[name] ?? ''}
               placeholder={name}
@@ -680,18 +680,18 @@ function ExtrasTab() {
       {/* 说书人复盘手记 */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h3 className="label-caps">说书人复盘手记</h3>
-          <button onClick={addSection} className="flex items-center gap-1 rounded-md border border-brass-700/50 px-2.5 py-1.5 text-xs font-semibold text-brass-300 hover:bg-brass-500/10">
+          <h3 className="label-caps-ui">说书人复盘手记</h3>
+          <button onClick={addSection} className="flex items-center gap-1 rounded-md border border-amber-700/40 dark:border-brass-700/50 px-2.5 py-1.5 text-xs font-semibold text-stone-600 dark:text-brass-300 hover:bg-amber-500/20 dark:hover:bg-brass-500/10">
             <Plus className="h-3.5 w-3.5" /> 添加章节
           </button>
         </div>
         {sections.map((s, i) => (
-          <div key={i} className="flex flex-col gap-2 rounded-lg border border-abyss-800 bg-abyss-900/50 p-3">
+          <div key={i} className="flex flex-col gap-2 rounded-lg border border-stone-300 dark:border-abyss-800 bg-white/60 dark:bg-abyss-900/50 p-3">
             <div className="flex items-center gap-2">
               <TextInput value={s.title} onChange={(e) => updateSection(i, { title: e.target.value })} className="flex-1" />
-              <button onClick={() => moveSection(i, -1)} className="rounded p-1 text-abyss-700 hover:text-brass-300"><ArrowUp className="h-3.5 w-3.5" /></button>
-              <button onClick={() => moveSection(i, 1)} className="rounded p-1 text-abyss-700 hover:text-brass-300"><ArrowDown className="h-3.5 w-3.5" /></button>
-              <button onClick={() => removeSection(i)} className="rounded p-1 text-abyss-700 hover:bg-evil/10 hover:text-evil"><Trash2 className="h-3.5 w-3.5" /></button>
+              <button onClick={() => moveSection(i, -1)} className="rounded p-1 text-stone-500 dark:text-abyss-700 hover:text-amber-700 dark:hover:text-brass-300"><ArrowUp className="h-3.5 w-3.5" /></button>
+              <button onClick={() => moveSection(i, 1)} className="rounded p-1 text-stone-500 dark:text-abyss-700 hover:text-amber-700 dark:hover:text-brass-300"><ArrowDown className="h-3.5 w-3.5" /></button>
+              <button onClick={() => removeSection(i)} className="rounded p-1 text-stone-500 dark:text-abyss-700 hover:bg-evil/10 hover:text-evil"><Trash2 className="h-3.5 w-3.5" /></button>
             </div>
             <TextArea rows={3} value={s.content} onChange={(e) => updateSection(i, { content: e.target.value })} />
           </div>
@@ -748,8 +748,8 @@ function LayoutTab() {
     <div className="flex flex-col gap-6">
       {/* 区块顺序 */}
       <section className="flex flex-col gap-3">
-        <h3 className="label-caps">长图区块顺序</h3>
-        <p className="text-[11px] text-abyss-700">拖拽或用上下按钮调整顺序；标题固定最上、页脚固定最下。截图默认排在魔典上方。</p>
+        <h3 className="label-caps-ui">长图区块顺序</h3>
+        <p className="text-[11px] text-stone-500 dark:text-abyss-700">拖拽或用上下按钮调整顺序；标题固定最上、页脚固定最下。截图默认排在魔典上方。</p>
         <div className="flex flex-col gap-1.5">
           {order.map((key) => {
             const isDragging = dragged === key
@@ -758,22 +758,22 @@ function LayoutTab() {
                 key={key}
                 onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
                 onDrop={(e) => { e.preventDefault(); if (dragged && dragged !== key) moveTo(dragged, key); setDragged(null) }}
-                className={`flex items-center gap-2 rounded-md border px-2.5 py-2 ${isDragging ? 'border-brass-500/60 bg-brass-500/5 opacity-50' : 'border-abyss-800 bg-abyss-900/50'}`}
+                className={`flex items-center gap-2 rounded-md border px-2.5 py-2 ${isDragging ? 'border-amber-500/60 dark:border-brass-500/60 bg-amber-500/10 dark:bg-brass-500/5 opacity-50' : 'border-stone-300 dark:border-abyss-800 bg-white/60 dark:bg-abyss-900/50'}`}
               >
                 <span
                   draggable
                   onDragStart={(e) => { setDragged(key); e.dataTransfer.effectAllowed = 'move' }}
                   onDragEnd={() => setDragged(null)}
-                  className="cursor-grab text-abyss-700 hover:text-brass-300"
+                  className="cursor-grab text-stone-500 dark:text-abyss-700 hover:text-amber-700 dark:hover:text-brass-300"
                   title="拖动排序"
                 >
                   <GripVertical className="h-4 w-4" />
                 </span>
-                <span className="text-sm font-semibold text-brass-200">{SECTION_LABELS[key]}</span>
-                <span className="text-[10px] uppercase tracking-wider text-abyss-700">{key}</span>
+                <span className="text-sm font-semibold text-stone-700 dark:text-brass-200">{SECTION_LABELS[key]}</span>
+                <span className="text-[10px] uppercase tracking-wider text-stone-500 dark:text-abyss-700">{key}</span>
                 <div className="ml-auto flex items-center gap-1">
-                  <button onClick={() => move(key, -1)} disabled={order.indexOf(key) === 0} className="rounded p-1 text-abyss-700 hover:text-brass-300 disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
-                  <button onClick={() => move(key, 1)} disabled={order.indexOf(key) === order.length - 1} className="rounded p-1 text-abyss-700 hover:text-brass-300 disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
+                  <button onClick={() => move(key, -1)} disabled={order.indexOf(key) === 0} className="rounded p-1 text-stone-500 dark:text-abyss-700 hover:text-amber-700 dark:hover:text-brass-300 disabled:opacity-30"><ArrowUp className="h-3.5 w-3.5" /></button>
+                  <button onClick={() => move(key, 1)} disabled={order.indexOf(key) === order.length - 1} className="rounded p-1 text-stone-500 dark:text-abyss-700 hover:text-amber-700 dark:hover:text-brass-300 disabled:opacity-30"><ArrowDown className="h-3.5 w-3.5" /></button>
                 </div>
               </div>
             )
@@ -783,27 +783,27 @@ function LayoutTab() {
 
       {/* 各模块强调色 */}
       <section className="flex flex-col gap-3">
-        <h3 className="label-caps">各模块强调色</h3>
-        <p className="text-[11px] text-abyss-700">单独覆盖某模块的强调色（图标 / 分隔线 / 装饰），未设置跟随主题；区块标题文字仍随主题保持可读。</p>
+        <h3 className="label-caps-ui">各模块强调色</h3>
+        <p className="text-[11px] text-stone-500 dark:text-abyss-700">单独覆盖某模块的强调色（图标 / 分隔线 / 装饰），未设置跟随主题；区块标题文字仍随主题保持可读。</p>
         <div className="flex flex-col gap-2">
           {accentRows.map((row) => {
             const override = accents[row.key]
             const current = override ?? themeAccent
             return (
-              <div key={row.key} className="flex items-center gap-2 rounded-md border border-abyss-800 bg-abyss-900/50 px-2.5 py-2">
-                <span className="w-20 shrink-0 text-sm font-semibold text-brass-200">{row.label}</span>
+              <div key={row.key} className="flex items-center gap-2 rounded-md border border-stone-300 dark:border-abyss-800 bg-white/60 dark:bg-abyss-900/50 px-2.5 py-2">
+                <span className="w-20 shrink-0 text-sm font-semibold text-stone-700 dark:text-brass-200">{row.label}</span>
                 <input
                   type="color"
                   value={current}
                   onChange={(e) => setAccent(row.key, e.target.value)}
-                  className="h-7 w-9 cursor-pointer rounded border border-abyss-700 bg-transparent p-0"
+                  className="h-7 w-9 cursor-pointer rounded border border-stone-300 dark:border-abyss-700 bg-transparent p-0"
                   title="选择强调色"
                 />
-                <span className="font-mono text-xs text-abyss-700">{current}</span>
+                <span className="font-mono text-xs text-stone-500 dark:text-abyss-700">{current}</span>
                 {override ? (
-                  <button onClick={() => clearAccent(row.key)} className="ml-auto rounded px-1.5 py-0.5 text-[11px] text-abyss-700 hover:text-brass-300" title="恢复跟随主题">跟随主题</button>
+                  <button onClick={() => clearAccent(row.key)} className="ml-auto rounded px-1.5 py-0.5 text-[11px] text-stone-500 dark:text-abyss-700 hover:text-amber-700 dark:hover:text-brass-300" title="恢复跟随主题">跟随主题</button>
                 ) : (
-                  <span className="ml-auto text-[11px] text-abyss-700">跟随主题</span>
+                  <span className="ml-auto text-[11px] text-stone-500 dark:text-abyss-700">跟随主题</span>
                 )}
               </div>
             )
@@ -870,24 +870,24 @@ function DataTab() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => downloadJSON(replay, '复盘数据')} className="flex items-center gap-1.5 rounded-md border border-brass-600/60 bg-brass-500/10 px-3 py-2 text-sm font-semibold text-brass-200 hover:bg-brass-500/20">
+        <button onClick={() => downloadJSON(replay, '复盘数据')} className="flex items-center gap-1.5 rounded-md border border-amber-600/50 dark:border-brass-600/60 bg-amber-500/15 dark:bg-brass-500/10 px-3 py-2 text-sm font-semibold text-stone-700 dark:text-brass-200 hover:bg-amber-500/30 dark:hover:bg-brass-500/20">
           <Download className="h-4 w-4" /> 导出 JSON
         </button>
-        <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-abyss-700 px-3 py-2 text-sm font-semibold text-abyss-700 hover:bg-abyss-850">
+        <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-stone-300 dark:border-abyss-700 px-3 py-2 text-sm font-semibold text-stone-500 dark:text-abyss-700 hover:bg-stone-200 dark:hover:bg-abyss-850">
           <Upload className="h-4 w-4" /> 导入 JSON
           <input type="file" accept=".json" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
         </label>
-        <button onClick={reset} className="flex items-center gap-1.5 rounded-md border border-abyss-700 px-3 py-2 text-sm font-semibold text-abyss-700 hover:bg-abyss-850">
+        <button onClick={reset} className="flex items-center gap-1.5 rounded-md border border-stone-300 dark:border-abyss-700 px-3 py-2 text-sm font-semibold text-stone-500 dark:text-abyss-700 hover:bg-stone-200 dark:hover:bg-abyss-850">
           <RotateCcw className="h-4 w-4" /> 恢复示例
         </button>
       </div>
-      {message && <p className="text-sm text-brass-200">{message}</p>}
+      {message && <p className="text-sm text-stone-700 dark:text-brass-200">{message}</p>}
 
       {/* 可选：复盘截图上传 */}
-      <div className="rounded-lg border border-abyss-800 bg-abyss-900/50 p-3">
+      <div className="rounded-lg border border-stone-300 dark:border-abyss-800 bg-white/60 dark:bg-abyss-900/50 p-3">
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="label-caps">复盘截图（可选，附于长图）</h3>
-          <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-abyss-700 px-2.5 py-1.5 text-xs font-semibold text-abyss-700 hover:bg-abyss-850">
+          <h3 className="label-caps-ui">复盘截图（可选，附于长图）</h3>
+          <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-stone-300 dark:border-abyss-700 px-2.5 py-1.5 text-xs font-semibold text-stone-500 dark:text-abyss-700 hover:bg-stone-200 dark:hover:bg-abyss-850">
             <ImageIcon className="h-3.5 w-3.5" /> 上传截图
             <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleScreenshot(e.target.files[0])} />
           </label>
@@ -895,21 +895,21 @@ function DataTab() {
         {screenshot ? (
           <div className="relative">
             <img src={screenshot} alt="复盘截图" className="max-h-48 w-full rounded-md object-contain" />
-            <button onClick={() => setScreenshot(null)} className="absolute right-1.5 top-1.5 rounded bg-abyss-950/80 p-1 text-abyss-700 hover:text-evil">
+            <button onClick={() => setScreenshot(null)} className="absolute right-1.5 top-1.5 rounded bg-stone-100/90 dark:bg-abyss-950/80 p-1 text-stone-500 dark:text-abyss-700 hover:text-evil">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         ) : (
-          <p className="text-xs text-abyss-700">未上传截图</p>
+          <p className="text-xs text-stone-500 dark:text-abyss-700">未上传截图</p>
         )}
       </div>
 
       <RecognizeModule />
 
       <div className="flex flex-col gap-2">
-        <h3 className="label-caps">当前数据（可直接编辑后复制）</h3>
+        <h3 className="label-caps-ui">当前数据（可直接编辑后复制）</h3>
         <textarea
-          className="h-[320px] w-full resize-y rounded-lg border border-abyss-800 bg-abyss-950/70 p-3 font-mono text-xs leading-relaxed text-brass-100 outline-none focus:border-brass-500/60"
+          className="h-[320px] w-full resize-y rounded-lg border border-stone-300 dark:border-abyss-800 bg-stone-100/90 dark:bg-abyss-950/70 p-3 font-mono text-xs leading-relaxed text-stone-800 dark:text-brass-100 outline-none focus:border-amber-500/70 dark:focus:border-brass-500/60"
           value={jsonText}
           spellCheck={false}
           onChange={(e) => {
@@ -1006,19 +1006,19 @@ function RecognizeModule() {
   }
 
   return (
-    <div className="rounded-lg border border-abyss-800 bg-abyss-900/50 p-3">
+    <div className="rounded-lg border border-stone-300 dark:border-abyss-800 bg-white/60 dark:bg-abyss-900/50 p-3">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="label-caps">识图载入（图片 / 链接 → 复盘内容）</h3>
+        <h3 className="label-caps-ui">识图载入（图片 / 链接 → 复盘内容）</h3>
         <button
           onClick={() => setShowConfig((v) => !v)}
-          className="flex items-center gap-1 rounded-md border border-abyss-700 px-2 py-1 text-xs font-semibold text-abyss-700 hover:bg-abyss-850"
+          className="flex items-center gap-1 rounded-md border border-stone-300 dark:border-abyss-700 px-2 py-1 text-xs font-semibold text-stone-500 dark:text-abyss-700 hover:bg-stone-200 dark:hover:bg-abyss-850"
         >
           <ChevronDown className={`h-3.5 w-3.5 transition ${showConfig ? 'rotate-180' : ''}`} /> 接口配置
         </button>
       </div>
 
       {showConfig && (
-        <div className="mb-3 flex flex-col gap-2 rounded-md border border-abyss-800 bg-abyss-950/50 p-2">
+        <div className="mb-3 flex flex-col gap-2 rounded-md border border-stone-300 dark:border-abyss-800 bg-stone-100/70 dark:bg-abyss-950/50 p-2">
           <Field label="接口地址（OpenAI 兼容）">
             <TextInput value={config.baseUrl} placeholder="https://api.openai.com/v1" onChange={(e) => persistConfig({ ...config, baseUrl: e.target.value })} />
           </Field>
@@ -1035,12 +1035,12 @@ function RecognizeModule() {
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-abyss-700 px-2.5 py-1.5 text-xs font-semibold text-abyss-700 hover:bg-abyss-850">
+          <label className="flex cursor-pointer items-center gap-1.5 rounded-md border border-stone-300 dark:border-abyss-700 px-2.5 py-1.5 text-xs font-semibold text-stone-500 dark:text-abyss-700 hover:bg-stone-200 dark:hover:bg-abyss-850">
             <ImageIcon className="h-3.5 w-3.5" /> 上传图片
             <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
           </label>
           <div className="flex min-w-0 flex-1 items-center gap-1">
-            <Link2 className="h-3.5 w-3.5 shrink-0 text-abyss-700" />
+            <Link2 className="h-3.5 w-3.5 shrink-0 text-stone-500 dark:text-abyss-700" />
             <TextInput className="flex-1" value={imageUrl} placeholder="或粘贴图片链接 https://…" onChange={(e) => setImageUrl(e.target.value)} />
           </div>
         </div>
@@ -1048,32 +1048,32 @@ function RecognizeModule() {
         {imageDataUrl && (
           <div className="relative">
             <img src={imageDataUrl} alt="待识别图片" className="max-h-40 w-full rounded-md object-contain" />
-            <button onClick={() => setImageDataUrl(null)} className="absolute right-1.5 top-1.5 rounded bg-abyss-950/80 p-1 text-abyss-700 hover:text-evil">
+            <button onClick={() => setImageDataUrl(null)} className="absolute right-1.5 top-1.5 rounded bg-stone-100/90 dark:bg-abyss-950/80 p-1 text-stone-500 dark:text-abyss-700 hover:text-evil">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
 
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-abyss-700">
-            <input type="checkbox" checked={autoLoad} onChange={(e) => setAutoLoad(e.target.checked)} className="h-3.5 w-3.5 accent-brass-500" />
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-stone-500 dark:text-abyss-700">
+            <input type="checkbox" checked={autoLoad} onChange={(e) => setAutoLoad(e.target.checked)} className="h-3.5 w-3.5 accent-amber-600 dark:accent-brass-500" />
             是否载入（识别成功后自动载入复盘内容）
           </label>
           <button
             onClick={handleRecognize}
             disabled={busy}
-            className="ml-auto flex items-center gap-1.5 rounded-md border border-brass-600/60 bg-brass-500/10 px-3 py-1.5 text-sm font-semibold text-brass-200 hover:bg-brass-500/20 disabled:opacity-50"
+            className="ml-auto flex items-center gap-1.5 rounded-md border border-amber-600/50 dark:border-brass-600/60 bg-amber-500/15 dark:bg-brass-500/10 px-3 py-1.5 text-sm font-semibold text-stone-700 dark:text-brass-200 hover:bg-amber-500/30 dark:hover:bg-brass-500/20 disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ScanLine className="h-4 w-4" />}
             {busy ? '识别中…' : '识别并载入'}
           </button>
         </div>
 
-        {status && <p className="text-xs text-brass-200">{status}</p>}
+        {status && <p className="text-xs text-stone-700 dark:text-brass-200">{status}</p>}
 
         {rawResult && (
           <textarea
-            className="h-40 w-full resize-y rounded-md border border-abyss-800 bg-abyss-950/70 p-2 font-mono text-xs leading-relaxed text-brass-100 outline-none"
+            className="h-40 w-full resize-y rounded-md border border-stone-300 dark:border-abyss-800 bg-stone-100/90 dark:bg-abyss-950/70 p-2 font-mono text-xs leading-relaxed text-stone-800 dark:text-brass-100 outline-none"
             value={rawResult}
             spellCheck={false}
             readOnly={autoLoad}
@@ -1084,7 +1084,7 @@ function RecognizeModule() {
         {rawResult && !autoLoad && (
           <button
             onClick={() => setStatus(importJSON(rawResult) ? '✅ 已手动载入复盘内容' : '❌ 解析失败，请检查 JSON')}
-            className="flex items-center gap-1.5 rounded-md border border-abyss-700 px-2.5 py-1.5 text-xs font-semibold text-abyss-700 hover:bg-abyss-850"
+            className="flex items-center gap-1.5 rounded-md border border-stone-300 dark:border-abyss-700 px-2.5 py-1.5 text-xs font-semibold text-stone-500 dark:text-abyss-700 hover:bg-stone-200 dark:hover:bg-abyss-850"
           >
             <Upload className="h-3.5 w-3.5" /> 手动载入该 JSON
           </button>

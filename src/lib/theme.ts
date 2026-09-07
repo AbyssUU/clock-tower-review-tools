@@ -249,7 +249,7 @@ export const REPLAY_THEMES: ReplayTheme[] = [
   },
 ]
 
-export const DEFAULT_THEME_ID = 'midnight-gold'
+export const DEFAULT_THEME_ID = 'parchment'
 
 /** 长图主体区块默认顺序：截图 → 魔典 → 时间线 → 手记（截图默认置于魔典上方） */
 export const DEFAULT_SECTION_ORDER: ReorderableSection[] = ['snapshot', 'grimoire', 'timeline', 'storyteller']
@@ -258,7 +258,7 @@ export const DEFAULT_SECTION_ORDER: ReorderableSection[] = ['snapshot', 'grimoir
 export const DEFAULT_VIGNETTE = 'radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(0,0,0,0.46) 100%)'
 
 export function getTheme(id?: string): ReplayTheme {
-  return REPLAY_THEMES.find((t) => t.id === id) ?? REPLAY_THEMES[0]
+  return REPLAY_THEMES.find((t) => t.id === (id ?? DEFAULT_THEME_ID)) ?? REPLAY_THEMES[0]
 }
 
 /** 在长图组件内读取当前主题（未设置时回退默认暗夜金） */
