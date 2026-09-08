@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:electron": "tsc -b && vite build --mode electron",
+    "build:vercel": "vite build --base=/",
     "preview": "vite preview",
     "dist:mac": "npm run build:electron && electron-builder --mac",
     "dist:win": "npm run build:electron && electron-builder --win",
